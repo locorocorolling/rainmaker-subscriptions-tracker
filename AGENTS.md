@@ -101,4 +101,35 @@ docker-compose exec mongo mongosh  # Access MongoDB
 - E2E test setup that works
 - Test data setup scripts
 
+## Git Commit Convention
+
+**All commits must follow Conventional Commits format:**
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types:**
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools
+
+**Examples:**
+```
+feat(frontend): add subscription list component
+fix(api): handle missing subscription id in delete endpoint
+docs: update README with setup instructions
+style: format code with prettier
+refactor: extract subscription service layer
+test: add unit tests for subscription validation
+chore: update dependencies to latest versions
+```
+
 Remember: This is an **append-only log** - don't worry about organization, just capture everything relevant. The user will clean it up later.
