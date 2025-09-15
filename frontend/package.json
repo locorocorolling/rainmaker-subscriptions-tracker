@@ -7,7 +7,10 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "tsc --noEmit",
+    "typecheck:staged": "git diff --cached --name-only --diff-filter=ACM | grep -E '\\.(ts|tsx)$' | xargs tsc --noEmit",
+    "typecheck:full": "react-router typegen && tsc",
+    "typecheck:routes": "react-router typegen"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
