@@ -15,11 +15,11 @@ interface DeleteConfirmationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
-  subscription: {
+  subscription?: {
     service: string
     status: string
     cost: { amount: number; currency: string }
-  }
+  } | null
 }
 
 export function DeleteConfirmationDialog({
@@ -33,6 +33,10 @@ export function DeleteConfirmationDialog({
     onOpenChange(false)
   }
 
+  if (!open) {
+    return null
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -44,21 +48,25 @@ export function DeleteConfirmationDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <div className="font-medium">{subscription.service}</div>
-              <div className="text-sm text-muted-foreground">
-                {subscription.cost.amount / 100} {subscription.cost.currency}
+          {subscription?.service && (
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <div className="font-medium">{subscription.service}</div>
+                <div className="text-sm text-muted-foreground">
+                  {subscription.cost ? `${subscription.cost.amount / 100} ${subscription.cost.currency}` : ''}
+                </div>
               </div>
+              {subscription.status && (
+                <Badge variant={
+                  subscription.status === 'active' ? 'default' :
+                  subscription.status === 'paused' ? 'secondary' :
+                  subscription.status === 'cancelled' ? 'destructive' : 'outline'
+                }>
+                  {subscription.status}
+                </Badge>
+              )}
             </div>
-            <Badge variant={
-              subscription.status === 'active' ? 'default' :
-              subscription.status === 'paused' ? 'secondary' :
-              subscription.status === 'cancelled' ? 'destructive' : 'outline'
-            }>
-              {subscription.status}
-            </Badge>
-          </div>
+          )}
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center gap-2 text-red-800">

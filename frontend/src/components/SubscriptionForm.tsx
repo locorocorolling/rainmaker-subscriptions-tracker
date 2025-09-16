@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -84,29 +84,60 @@ export function SubscriptionForm({
   initialData,
   title,
 }: SubscriptionFormProps) {
+  const defaultValues = useMemo(() => ({
+    service: "",
+    description: "",
+    category: "",
+    cost: {
+      amount: 0,
+      currency: "USD",
+    },
+    billingCycle: {
+      value: 1,
+      unit: "month",
+    },
+    nextRenewal: "",
+    status: "active",
+    metadata: {
+      color: "#000000",
+      url: "",
+      notes: "",
+    },
+  }), [])
+
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
-    defaultValues: {
-      service: initialData?.service || "",
-      description: initialData?.description || "",
-      category: initialData?.category || "",
-      cost: {
-        amount: initialData?.cost?.amount || 0,
-        currency: initialData?.cost?.currency || "USD",
-      },
-      billingCycle: {
-        value: initialData?.billingCycle?.value || 1,
-        unit: initialData?.billingCycle?.unit || "month",
-      },
-      nextRenewal: initialData?.nextRenewal || "",
-      status: initialData?.status || "active",
-      metadata: {
-        color: initialData?.metadata?.color || "",
-        url: initialData?.metadata?.url || "",
-        notes: initialData?.metadata?.notes || "",
-      },
-    },
+    defaultValues: defaultValues,
   })
+
+  // Reset form when initialData changes or modal opens
+  useEffect(() => {
+    if (open && initialData) {
+      const resetValues = {
+        service: initialData.service || "",
+        description: initialData.description || "",
+        category: initialData.category || "",
+        cost: {
+          amount: initialData.cost?.amount || 0,
+          currency: initialData.cost?.currency || "USD",
+        },
+        billingCycle: {
+          value: initialData.billingCycle?.value || 1,
+          unit: initialData.billingCycle?.unit || "month",
+        },
+        nextRenewal: initialData.nextRenewal || "",
+        status: initialData.status || "active",
+        metadata: {
+          color: initialData.metadata?.color || "",
+          url: initialData.metadata?.url || "",
+          notes: initialData.metadata?.notes || "",
+        },
+      }
+      form.reset(resetValues)
+    } else if (open) {
+      form.reset(defaultValues)
+    }
+  }, [open, initialData])
 
   const handleSubmit = (data: SubscriptionFormData) => {
     onSubmit(data)
@@ -328,7 +359,12 @@ export function SubscriptionForm({
                   <FormItem>
                     <FormLabel>Brand Color</FormLabel>
                     <FormControl>
-                      <Input type="color" {...field} />
+                      <Input
+                        type="color"
+                        {...field}
+                        value={field.value || "#000000"}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

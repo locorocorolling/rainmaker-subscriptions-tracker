@@ -51,6 +51,70 @@ interface SubscriptionListProps {
 
 const columnHelper = createColumnHelper<Subscription>();
 
+// Mock data for development (moved outside component to prevent recreation)
+const mockSubscriptions: Subscription[] = [
+  {
+    id: "1",
+    service: "Netflix",
+    description: "Premium streaming service",
+    category: "Entertainment",
+    cost: { amount: 1599, currency: "USD" },
+    billingCycle: { value: 1, unit: "month" },
+    nextRenewal: new Date("2024-12-15"),
+    status: "active",
+    metadata: {
+      color: "#E50914",
+      url: "https://netflix.com",
+      notes: "Family plan"
+    }
+  },
+  {
+    id: "2",
+    service: "Spotify",
+    description: "Music streaming service",
+    category: "Music",
+    cost: { amount: 999, currency: "USD" },
+    billingCycle: { value: 1, unit: "month" },
+    nextRenewal: new Date("2024-12-01"),
+    status: "active",
+    metadata: {
+      color: "#1DB954",
+      url: "https://spotify.com",
+      notes: "Premium individual"
+    }
+  },
+  {
+    id: "3",
+    service: "GitHub Pro",
+    description: "Developer tools and repositories",
+    category: "Development",
+    cost: { amount: 400, currency: "USD" },
+    billingCycle: { value: 1, unit: "month" },
+    nextRenewal: new Date("2024-12-31"),
+    status: "active",
+    metadata: {
+      color: "#24292e",
+      url: "https://github.com",
+      notes: "Pro account for private repos"
+    }
+  },
+  {
+    id: "4",
+    service: "Adobe Creative Cloud",
+    description: "Design and creative software suite",
+    category: "Design",
+    cost: { amount: 5299, currency: "USD" },
+    billingCycle: { value: 1, unit: "year" },
+    nextRenewal: new Date("2025-01-15"),
+    status: "active",
+    metadata: {
+      color: "#FF0000",
+      url: "https://adobe.com",
+      notes: "All apps plan"
+    }
+  }
+];
+
 export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -64,73 +128,9 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
 
-  // Mock data for development
-  const mockSubscriptions: Subscription[] = [
-    {
-      id: "1",
-      service: "Netflix",
-      description: "Premium streaming service",
-      category: "Entertainment",
-      cost: { amount: 1599, currency: "USD" },
-      billingCycle: { value: 1, unit: "month" },
-      nextRenewal: new Date("2024-12-15"),
-      status: "active",
-      metadata: {
-        color: "#E50914",
-        url: "https://netflix.com",
-        notes: "Family plan"
-      }
-    },
-    {
-      id: "2",
-      service: "Spotify",
-      description: "Music streaming service",
-      category: "Music",
-      cost: { amount: 999, currency: "USD" },
-      billingCycle: { value: 1, unit: "month" },
-      nextRenewal: new Date("2024-12-01"),
-      status: "active",
-      metadata: {
-        color: "#1DB954",
-        url: "https://spotify.com",
-        notes: "Premium individual"
-      }
-    },
-    {
-      id: "3",
-      service: "GitHub Pro",
-      description: "Developer tools and repositories",
-      category: "Development",
-      cost: { amount: 400, currency: "USD" },
-      billingCycle: { value: 1, unit: "month" },
-      nextRenewal: new Date("2024-12-31"),
-      status: "active",
-      metadata: {
-        color: "#24292e",
-        url: "https://github.com",
-        notes: "Pro account for private repos"
-      }
-    },
-    {
-      id: "4",
-      service: "Adobe Creative Cloud",
-      description: "Design and creative software suite",
-      category: "Design",
-      cost: { amount: 5299, currency: "USD" },
-      billingCycle: { value: 1, unit: "year" },
-      nextRenewal: new Date("2025-01-15"),
-      status: "active",
-      metadata: {
-        color: "#FF0000",
-        url: "https://adobe.com",
-        notes: "All apps plan"
-      }
-    }
-  ];
-
   // Initialize with mock data if no subscriptions provided
   useEffect(() => {
-    if (subscriptions.length > 0) {
+    if (subscriptions && subscriptions.length > 0) {
       setAllSubscriptions(subscriptions);
     } else {
       setAllSubscriptions(mockSubscriptions);
@@ -365,7 +365,9 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
     enableSortingRemoval: false,
   });
 
-  const sortedSubscriptions = table.getSortedRowModel().rows.map(row => row.original);
+  const sortedSubscriptions = useMemo(() => {
+    return table.getSortedRowModel().rows.map(row => row.original);
+  }, [filteredSubscriptions, sorting]);
 
   return (
     <div className="space-y-6">
@@ -552,7 +554,7 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteSubscription}
-        subscription={deletingSubscription!}
+        subscription={deletingSubscription}
       />
     </div>
   );
