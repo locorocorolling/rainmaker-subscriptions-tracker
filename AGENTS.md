@@ -252,4 +252,21 @@ This workflow ensures that all changes, whether single file or multi-file, are p
 
 ---
 
+## 📝 **Documentation Principles**
+
+### **Principle-Focused Conciseness**
+When updating AGENTS.md files, follow these guidelines:
+
+- **Conceptual over specific**: Use "dev server URL" instead of specific ports/addresses
+- **Capability over implementation**: Describe what agents can do, not how tools work  
+- **Essential only**: Include only information critical for understanding and execution
+- **Future-proof**: Avoid dependencies on specific configurations that may change
+- **Workflow-focused**: Emphasize the process and outcomes, not technical mechanics
+- **No tool lists**: Agents don't need specific tool names or categorizations
+- **Clear value**: Explain why something matters, not just what it is
+
+**Goal**: Enable agents to understand capabilities and workflows without overwhelming them with implementation details that may change or aren't essential for task execution.
+
+---
+
 Remember: This is an **append-only log** - don't worry about organization, just capture everything relevant. The user will clean it up later.
