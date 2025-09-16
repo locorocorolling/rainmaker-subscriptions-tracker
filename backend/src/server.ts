@@ -8,6 +8,7 @@ import { createLogger, format, transports } from 'winston';
 import { connectMongoDB, checkMongoDBHealth } from './utils/database';
 import { config } from './utils/config';
 import authRoutes from './routes/auth';
+import subscriptionRoutes from './routes/subscriptions';
 
 // Load environment variables
 dotenv.config();
@@ -93,13 +94,17 @@ app.get('/api', (req, res) => {
       health: '/health',
       api: '/api',
       docs: '/api-docs', // Will be available when we add Swagger
-      auth: '/api/auth'
+      auth: '/api/auth',
+      subscriptions: '/api/subscriptions'
     }
   });
 });
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Subscription routes
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
