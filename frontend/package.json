@@ -8,7 +8,6 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "tsc --noEmit",
-    "typecheck:staged": "git diff --cached --name-only --diff-filter=ACM | grep -E '\\.(ts|tsx)$' | sed 's|^frontend/||' | xargs tsc --noEmit",
     "typecheck:full": "react-router typegen && tsc --noEmit",
     "typecheck:routes": "react-router typegen"
   },
