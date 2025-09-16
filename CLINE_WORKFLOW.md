@@ -159,21 +159,27 @@ Refs #1234"
 
 #### **User Confirmation Mode**
 ```bash
-# Agent presents commit preview
-echo "Ready to commit with message:"
-echo "---------------------------------"
-echo "fix(auth): prevent token expiry during refresh"
-echo
-echo "Token refresh sometimes failed because we requested a new"
-echo "token too late. Added a 30s buffer window to guarantee"
-echo "validity. Chose buffer over retry-loop to avoid extra load."
-echo
-echo "(Proceed with commit? y/n/modify)"
+# Agent presents commit preview directly in chat interface
+# (No bash commands needed - display formatted text in chat)
+```
+**Chat Display:**
+```
+Ready to commit with message:
+---------------------------------
+fix(auth): prevent token expiry during refresh
+
+Token refresh sometimes failed because we requested a new
+token too late. Added a 30s buffer window to guarantee
+validity. Chose buffer over retry-loop to avoid extra load.
+
+(Proceed with commit? y/n/modify)
 ```
 **User Responses**:
 - `y` or `yes`: Agent proceeds with commit  
 - `n` or `no`: Agent returns to staging step for corrections  
 - `modify`: Agent regenerates commit message and reprompts
+
+**Note**: Display commit preview directly in chat interface for clean formatting and better user experience
 
 ## 🤖 **Intelligent Staging (Both Modes)**
 
