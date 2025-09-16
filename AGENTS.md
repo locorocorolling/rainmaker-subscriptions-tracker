@@ -61,11 +61,16 @@ pnpm run dev
 
 ## File Structure for Documentation
 ```
-docs/
+docs/                           # Public documentation
 ├── README_NOTES.md           # Running setup instructions
-├── TECHNICAL_DECISIONS.md    # Design decisions log
-├── DEMO_SCRIPT_NOTES.md      # Demo talking points
-└── API_EXAMPLES.md           # Working API calls for docs
+└── BACKEND_IMPLEMENTATION_OVERVIEW.md  # External-facing overview
+
+working-docs/                   # Internal development documentation
+├── decisions/
+│   └── TECHNICAL_DECISIONS.md    # Design decisions log
+├── demos/
+│   └── DEMO_SCRIPT_NOTES.md      # Demo talking points
+└── API_EXAMPLES.md           # Working API calls for docs (to be created)
 ```
 
 ## Time Tracking Reminder
