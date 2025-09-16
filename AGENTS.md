@@ -156,6 +156,20 @@ This ensures smooth operation when AI agents are working with Cline and prevents
 
 ---
 
+## Commit Workflow
+
+**See [working-docs/development/COMMIT_WORKFLOW.md](working-docs/development/COMMIT_WORKFLOW.md) for comprehensive commit workflow guidelines including:**
+
+- **Autonomous vs User Confirmation modes** for intelligent commit handling
+- **Intelligent file staging** with self-correction capabilities
+- **Professional commit message generation** following senior developer standards
+- **Complete workflow examples** and recovery scenarios
+- **Cline-specific git command usage** with `--no-pager` requirements
+
+**Key Reference**: Always use `git --no-pager` when working with Cline to prevent interactive pager issues.
+
+---
+
 ## Git Commit Convention
 
 **All commits must follow Conventional Commits format:**
