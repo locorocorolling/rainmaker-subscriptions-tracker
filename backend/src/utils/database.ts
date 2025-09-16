@@ -76,7 +76,14 @@ export const gracefulShutdown = async (redisClient: any): Promise<void> => {
 // Health check functions
 export const checkMongoDBHealth = async (): Promise<boolean> => {
   try {
-    await mongoose.connection.db.admin().ping();
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.admin().ping();
+    } else {
+      // If db is not available, check connection state
+      if (mongoose.connection.readyState !== 1) {
+        return false;
+      }
+    }
     return true;
   } catch (error) {
     logger.error('MongoDB health check failed:', error);
