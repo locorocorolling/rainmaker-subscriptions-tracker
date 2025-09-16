@@ -65,3 +65,79 @@
 - `backend/src/routes/auth.ts` - Auth endpoints
 - `backend/src/utils/auth.ts` - Auth utilities
 - `backend/src/models/User.ts` - User model with password hashing
+
+## Testing Strategy and Trade-offs (2025-09-17, 30 mins)
+
+**Context**: Interview project with 16-20 hour time constraint and priority focus on frontend polish
+**Decision**: Intentionally omit automated tests in favor of working demo and frontend integration
+**Reasoning**:
+- Interview priorities explicitly state: Frontend polish > API completeness > System design > Tests
+- Time constraints make comprehensive testing unrealistic within deadline
+- Working, polished frontend demo provides more interview value than test coverage
+- Type safety and validation provide some quality assurance
+- Manual testing through API endpoints sufficient for demonstration
+
+**Professional Context**:
+In a production environment, this code absolutely would have comprehensive tests:
+- Unit tests for service layer business logic (date calculations, billing cycles)
+- Integration tests for all API endpoints and authentication
+- Database tests for model operations and validations
+- Security tests for authentication and authorization
+- Error handling and edge case coverage
+
+**Alternatives Considered**:
+- TDD approach (write tests first, then code) - Too time-consuming for interview context
+- Critical-path testing only (auth, billing logic) - Still takes 2-3 hours
+- Post-deployment testing (not viable for interview demo)
+
+**Trade-offs**:
+- **Speed vs Quality**: Faster development but no regression safety net
+- **Demo vs Robustness**: Working frontend impresses more than test coverage reports
+- **Manual vs Automated**: Reliance on manual testing through API calls
+- **Type Safety vs Test Coverage**: TypeScript provides some protection but not runtime validation
+
+**Risk Mitigation**:
+- Comprehensive Joi validation schemas prevent invalid data
+- TypeScript type safety catches many errors at compile time
+- MongoDB schema validation provides database-level protection
+- Authentication middleware ensures security boundaries
+- Manual API testing during development catches obvious issues
+
+**When Tests Would Be Added (Professional Timeline)**:
+1. **Critical path tests** (auth, billing logic) - Before production deployment
+2. **API integration tests** - During CI/CD pipeline setup
+3. **End-to-end tests** - When onboarding team members
+4. **Performance tests** - When scaling to production load
+
+**Demo Value**: Shows pragmatic decision-making and understanding of business priorities vs. engineering ideals
+
+**Key Files**:
+- All implemented files would need corresponding test files
+- `backend/src/services/subscription.ts` - Business logic most critical for testing
+- `backend/src/middleware/auth.ts` - Security critical for testing
+
+## Production Environment Security (2025-09-17, 5 mins)
+
+**Context**: Need to secure API documentation endpoints for production deployment
+**Decision**: Restrict Swagger UI and OpenAPI specification endpoints to non-production environments only
+**Reasoning**:
+- API documentation exposes internal implementation details
+- Production environments should minimize attack surface
+- Swagger UI can reveal endpoint structure and potential vulnerabilities
+- Development teams still need access to API documentation during development
+
+**Implementation**:
+- Wrapped Swagger endpoints in environment check: `if (config.NODE_ENV !== 'production')`
+- Updated API info endpoint to conditionally show docs endpoint
+- Both `/api-docs` (UI) and `/api-docs.json` (raw spec) are restricted
+
+**Security Benefits**:
+- Prevents unauthorized access to API structure in production
+- Reduces information disclosure to potential attackers
+- Follows security best practices for production APIs
+- Maintains developer experience in development/staging environments
+
+**Demo Value**: Shows understanding of production security concerns and environment-specific configuration
+
+**Key Files**:
+- `backend/src/server.ts` - Environment-specific Swagger endpoint configuration
