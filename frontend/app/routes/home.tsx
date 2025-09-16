@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -41,12 +42,8 @@ export default function Home() {
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="flex gap-4">
-          <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Add Subscription
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
-            View All Subscriptions
-          </button>
+          <Button>Add Subscription</Button>
+          <Button variant="secondary">View All Subscriptions</Button>
         </div>
       </div>
     </div>
