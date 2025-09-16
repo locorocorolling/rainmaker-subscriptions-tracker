@@ -126,3 +126,18 @@ Route types are automatically generated in `.react-router/types/` and included i
 - **Use the appropriate commands** for your use case
 - **Keep commits atomic** and focused on single logical changes
 - **Build before committing** to catch production issues early
+
+---
+
+## 🎨 **UI Component Pattern**
+
+**Architecture**: shadcn/ui style - custom components on Radix UI primitives + Tailwind CSS
+
+**Available**: Button, Card, Badge, Table components in `src/components/ui/`
+
+**When adding components**: Install Radix UI primitives first:
+```bash
+pnpm add @radix-ui/react-dialog @radix-ui/react-label @radix-ui/react-select
+```
+
+**Pattern**: Use `cva()` for variants, forwardRef for accessibility, follow existing component structure

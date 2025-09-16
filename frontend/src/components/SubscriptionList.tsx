@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from "@/lib/utils";
+import { SubscriptionForm } from "@/components/SubscriptionForm";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import {
   createColumnHelper,
   flexRender,
@@ -52,6 +55,14 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('all');
+
+  // CRUD state
+  const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
 
   // Mock data for development
   const mockSubscriptions: Subscription[] = [
@@ -117,7 +128,16 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
     }
   ];
 
-  const displaySubscriptions = subscriptions.length > 0 ? subscriptions : mockSubscriptions;
+  // Initialize with mock data if no subscriptions provided
+  useEffect(() => {
+    if (subscriptions.length > 0) {
+      setAllSubscriptions(subscriptions);
+    } else {
+      setAllSubscriptions(mockSubscriptions);
+    }
+  }, [subscriptions]);
+
+  const displaySubscriptions = allSubscriptions;
 
   // Apply status filter
   const filteredSubscriptions = useMemo(() => {
@@ -139,6 +159,71 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
         return total + monthlyAmount;
       }, 0);
   }, [filteredSubscriptions]);
+
+  // CRUD Handler Functions
+  const handleAddSubscription = (data: any) => {
+    const newSubscription: Subscription = {
+      id: Date.now().toString(),
+      service: data.service,
+      description: data.description,
+      category: data.category,
+      cost: data.cost,
+      billingCycle: data.billingCycle,
+      nextRenewal: new Date(data.nextRenewal),
+      status: data.status,
+      metadata: {
+        color: data.metadata.color || undefined,
+        url: data.metadata.url || undefined,
+        notes: data.metadata.notes || undefined,
+      },
+    };
+    setAllSubscriptions(prev => [...prev, newSubscription]);
+  };
+
+  const handleEditSubscription = (data: any) => {
+    if (!editingSubscription) return;
+
+    const updatedSubscription: Subscription = {
+      ...editingSubscription,
+      service: data.service,
+      description: data.description,
+      category: data.category,
+      cost: data.cost,
+      billingCycle: data.billingCycle,
+      nextRenewal: new Date(data.nextRenewal),
+      status: data.status,
+      metadata: {
+        ...editingSubscription.metadata,
+        color: data.metadata.color || undefined,
+        url: data.metadata.url || undefined,
+        notes: data.metadata.notes || undefined,
+      },
+    };
+
+    setAllSubscriptions(prev =>
+      prev.map(sub => sub.id === editingSubscription.id ? updatedSubscription : sub)
+    );
+    setEditingSubscription(null);
+  };
+
+  const handleDeleteSubscription = () => {
+    if (!deletingSubscription) return;
+
+    setAllSubscriptions(prev =>
+      prev.filter(sub => sub.id !== deletingSubscription.id)
+    );
+    setDeletingSubscription(null);
+  };
+
+  const openEditDialog = (subscription: Subscription) => {
+    setEditingSubscription(subscription);
+    setIsEditDialogOpen(true);
+  };
+
+  const openDeleteDialog = (subscription: Subscription) => {
+    setDeletingSubscription(subscription);
+    setIsDeleteDialogOpen(true);
+  };
 
   // Define columns
   const columns = useMemo<ColumnDef<Subscription, any>[]>(
@@ -231,16 +316,34 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
         header: () => (
           <div className="text-right font-medium">Actions</div>
         ),
-        cell: () => (
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm">
-              Edit
-            </Button>
-            <Button variant="outline" size="sm">
-              View
-            </Button>
-          </div>
-        ),
+        cell: (info) => {
+          const subscription = info.row.original;
+          return (
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openEditDialog(subscription)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(subscription.metadata?.url, '_blank')}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => openDeleteDialog(subscription)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        },
       }),
     ],
     []
@@ -308,6 +411,13 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Subscription
+          </Button>
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             size="sm"
@@ -412,6 +522,38 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
           )}
         </CardContent>
       </Card>
+
+      {/* CRUD Modals */}
+      <SubscriptionForm
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSubmit={handleAddSubscription}
+        title="Add New Subscription"
+      />
+
+      <SubscriptionForm
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSubmit={handleEditSubscription}
+        initialData={editingSubscription ? {
+          service: editingSubscription.service,
+          description: editingSubscription.description,
+          category: editingSubscription.category,
+          cost: editingSubscription.cost,
+          billingCycle: editingSubscription.billingCycle,
+          nextRenewal: editingSubscription.nextRenewal.toISOString().split('T')[0],
+          status: editingSubscription.status,
+          metadata: editingSubscription.metadata,
+        } : undefined}
+        title="Edit Subscription"
+      />
+
+      <DeleteConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteSubscription}
+        subscription={deletingSubscription!}
+      />
     </div>
   );
 }
