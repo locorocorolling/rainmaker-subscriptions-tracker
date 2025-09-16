@@ -132,4 +132,114 @@ test: add unit tests for subscription validation
 chore: update dependencies to latest versions
 ```
 
+---
+
+# Iterative Development Workflow
+
+## 🎯 **Core Philosophy**
+
+Use **small, focused changes** with type safety at every step. The goal is to keep the surface area manageable for verification, whether by humans or AI agents.
+
+## 🚀 **The Iterative Process**
+
+### **Step 1: Make Focused Changes**
+Modify one or more related files to implement a single logical change. Examples:
+- Add a new component import to existing files
+- Update component usage across multiple related files
+- Create a new feature with its components and routes
+
+**Key**: Keep changes focused and related. Don't mix unrelated features in the same iteration.
+
+### **Step 2: Stage Changes**
+```bash
+# Stage all files involved in this iteration
+git add path/to/file1.tsx path/to/file2.tsx
+```
+
+### **Step 3: Validate with Typechecking and Build**
+```bash
+# Run typecheck on all files
+pnpm run typecheck
+
+# Run build to ensure production readiness
+pnpm run build
+```
+
+This validates your changes using the full project configuration, ensuring:
+- Path aliases resolve correctly (`@/components/ui/card`)
+- JSX configuration works properly
+- React Router route types are available
+- All imports and dependencies are satisfied
+- Production build completes successfully
+
+### **Step 4: Evaluate and Commit**
+- **✅ Passes**: Commit with confidence
+  ```bash
+  git commit -m "feat: implement focused change description"
+  ```
+- **❌ Fails**: Fix the identified type errors, then repeat from Step 2
+
+## 📝 **Example Iterations**
+
+### **Single Component Iteration**
+```bash
+# Add Card component to home route
+git add src/components/ui/card.tsx src/lib/utils.ts
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Card components in home page"
+```
+
+### **Multi-Component Iteration**
+```bash
+# Add Button component and update pages to use it
+git add src/components/ui/button.tsx app/routes/home.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Button components in home page"
+```
+
+### **Feature Iteration**
+```bash
+# Complete feature: new component + route + integration
+git add src/components/ui/badge.tsx app/routes/subscriptions.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: enhance subscriptions page with Card, Button, and Badge components"
+```
+
+## ⚠️ **Important: TypeScript CLI Limitations**
+
+**Do not use single file CLI typechecking:**
+```bash
+# ❌ These don't work properly:
+npx tsc --noEmit app/routes/subscriptions.tsx
+npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
+```
+
+**Why**: TypeScript CLI doesn't allow mixing project configuration with source files, so single file typechecking doesn't load tsconfig.json properly.
+
+**Solution**: Always use `pnpm run typecheck` for full project validation.
+
+## 🔗 **Related Documentation**
+
+- **[Frontend Development Workflow](frontend/AGENTS.md)**: Detailed frontend-specific workflow, typecheck commands, infrastructure setup, troubleshooting, and best practices
+- **[Typecheck Commands](frontend/AGENTS.md#typecheck-commands)**: Available commands and their use cases
+- **[Infrastructure Setup](frontend/AGENTS.md#infrastructure)**: Path aliases, route types, and configuration
+- **[Troubleshooting](frontend/AGENTS.md#troubleshooting)**: Common issues and solutions
+- **[Best Practices](frontend/AGENTS.md#best-practices)**: Guidelines for humans and AI agents
+
+## 🎯 **Benefits**
+
+- **Zero Broken Commits**: Typechecking and build prevent committing broken code
+- **Manageable Verification**: Small surface area is easy to review and validate
+- **Fast Feedback**: Typechecking provides quick validation
+- **Type Safety**: All dependencies and imports are validated at each step
+- **Production Ready**: Build step ensures changes work in production
+- **Consistent**: Works identically for human contributors and AI agents
+
+This workflow ensures that all changes, whether single file or multi-file, are properly validated before being committed to the codebase.
+
+---
+
 Remember: This is an **append-only log** - don't worry about organization, just capture everything relevant. The user will clean it up later.
