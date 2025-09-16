@@ -1,4 +1,5 @@
 import type { Route } from "./+types/home";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -9,20 +10,32 @@ export default function Home() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Active Subscriptions</h2>
-          <p className="text-2xl font-bold">4</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Active Subscriptions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">4</p>
+          </CardContent>
+        </Card>
         
-        <div className="p-6 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Monthly Total</h2>
-          <p className="text-2xl font-bold">$45.97</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Monthly Total</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">$45.97</p>
+          </CardContent>
+        </Card>
         
-        <div className="p-6 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Next Renewal</h2>
-          <p className="text-2xl font-bold">15 days</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Next Renewal</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">15 days</p>
+          </CardContent>
+        </Card>
       </div>
       
       <div className="mt-8">
