@@ -101,6 +101,56 @@ docker-compose exec mongo mongosh  # Access MongoDB
 - E2E test setup that works
 - Test data setup scripts
 
+## Git Command Usage with Cline
+
+**Important: When working with Cline, always use `git --no-pager` to avoid interactive pager issues**
+
+### **Cline-Specific Git Commands**
+When AI agents are aware they are working with Cline, they must prefix git commands with `--no-pager` to prevent interactive terminal pagers:
+
+```bash
+# ❌ Avoid - this may trigger interactive pager
+git log
+git log --oneline -10
+git log --format=fuller -5
+
+# ✅ Use with Cline - prevents interactive pager
+git --no-pager log
+git --no-pager log --oneline -10
+git --no-pager log --format=fuller -5
+```
+
+### **Why This Matters**
+- **Interactive pagers**: Commands like `git log` may open interactive pagers (like `less`) that require user input (d to scroll down, q to quit)
+- **Cline compatibility**: Using `--no-pager` ensures git commands output directly without requiring user interaction
+- **Agent awareness**: LLMs working with Cline may not be aware of terminal interaction capabilities, leading to hanging commands
+- **Consistent experience**: Ensures git commands work predictably across different models and Cline sessions
+
+### **When to Apply**
+- **All git log commands**: `git --no-pager log [options]`
+- **Git show commands**: `git --no-pager show [commit]`
+- **Git diff commands**: `git --no-pager diff [options]`
+- **Any git command that might paginate**: When in doubt, use `--no-pager`
+
+### **Examples in Practice**
+```bash
+# Check commit history
+git --no-pager log --oneline -10
+
+# View detailed commit information
+git --no-pager log --format=fuller -5
+
+# Show specific commit
+git --no-pager show abc1234
+
+# View staged changes
+git --no-pager diff --staged
+```
+
+This ensures smooth operation when AI agents are working with Cline and prevents commands from hanging due to interactive pagers.
+
+---
+
 ## Git Commit Convention
 
 **All commits must follow Conventional Commits format:**
