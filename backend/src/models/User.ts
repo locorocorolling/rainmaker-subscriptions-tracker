@@ -66,7 +66,6 @@ const UserSchema = new Schema<IUserDocument>({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
     trim: true,
     validate: {
@@ -96,8 +95,7 @@ const UserSchema = new Schema<IUserDocument>({
   },
   isActive: {
     type: Boolean,
-    default: true,
-    index: true
+    default: true
   },
   lastLogin: {
     type: Date

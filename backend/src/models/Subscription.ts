@@ -184,8 +184,7 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
   status: {
     type: String,
     enum: ['active', 'paused', 'cancelled', 'expired'],
-    default: 'active',
-    index: true
+    default: 'active'
   },
   metadata: {
     type: MetadataSchema,
