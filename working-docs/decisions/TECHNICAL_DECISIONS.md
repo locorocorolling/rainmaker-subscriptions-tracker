@@ -30,3 +30,38 @@
 **Key Files**:
 - `shared/types/subscription.ts` - Complete type definitions
 - `shared/utils/dateCalculations.ts` - Edge case handling logic
+
+## Authentication System (2025-09-16, 1.5 hours)
+
+**Context**: Need secure user authentication system for API protection
+**Decision**: JWT-based authentication with bcryptjs password hashing
+**Reasoning**:
+- JWT tokens are stateless and scale well
+- bcryptjs provides strong password hashing with salt rounds
+- Express middleware pattern for clean route protection
+- Joi validation for input sanitization
+- Separate auth utilities for reusability
+
+**Alternatives Considered**:
+- Session-based authentication (requires server-side state)
+- OAuth2 integration (overkill for simple auth)
+- Passport.js (additional complexity for this scope)
+
+**Trade-offs**:
+- JWT tokens can't be easily revoked (no token blacklist)
+- bcryptjs is slower than bcrypt but more compatible
+- More files and structure vs monolithic approach
+
+**Implementation Details**:
+- JWT tokens expire after 7 days
+- Password hashing uses 12 salt rounds
+- Two middleware patterns: required and optional auth
+- User model includes preferences and account management fields
+
+**Demo Value**: Shows proper security practices and clean code organization
+
+**Key Files**:
+- `backend/src/middleware/auth.ts` - Authentication middleware
+- `backend/src/routes/auth.ts` - Auth endpoints
+- `backend/src/utils/auth.ts` - Auth utilities
+- `backend/src/models/User.ts` - User model with password hashing

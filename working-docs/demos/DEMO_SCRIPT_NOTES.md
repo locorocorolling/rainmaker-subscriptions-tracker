@@ -18,3 +18,30 @@
 **Code Location**: `shared/types/subscription.ts`
 **Technical Depth**: Money stored in minor units, denormalized analytics fields
 **Why It Impresses**: Shows scalable architecture thinking and data consistency planning
+
+## Authentication System (Security Showcase)
+**Demo Talking Point**: "JWT-based authentication with proper security practices"
+**Show**:
+- User registration with password hashing
+- Login flow with JWT token generation
+- Protected endpoints with authentication middleware
+- User profile retrieval with valid tokens
+**Technical Depth**:
+- bcryptjs password hashing with 12 salt rounds
+- JWT tokens with 7-day expiration
+- Express middleware for route protection
+- Joi input validation for security
+**Code Location**: `backend/src/middleware/auth.ts`, `backend/src/routes/auth.ts`
+**Why It Impresses**: Demonstrates understanding of security best practices and clean code organization
+
+## Docker Infrastructure Setup
+**Demo Talking Point**: "Production-ready infrastructure with Docker Compose"
+**Show**:
+- MongoDB, Redis, and monitoring services running in containers
+- Health check endpoints showing database connectivity
+- Service discovery and networking
+**Technical Depth**:
+- Docker Compose configuration
+- Database connection management
+- Graceful startup procedures
+**Why It Impresses**: Shows DevOps knowledge and production deployment preparation

@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { createLogger, format, transports } from 'winston';
 import { connectMongoDB, checkMongoDBHealth } from './utils/database';
 import { config } from './utils/config';
+import authRoutes from './routes/auth';
 
 // Load environment variables
 dotenv.config();
@@ -91,10 +92,14 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/health',
       api: '/api',
-      docs: '/api-docs' // Will be available when we add Swagger
+      docs: '/api-docs', // Will be available when we add Swagger
+      auth: '/api/auth'
     }
   });
 });
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
