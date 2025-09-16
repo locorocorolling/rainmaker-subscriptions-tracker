@@ -93,21 +93,41 @@ fixed bug in auth token refresh logic
 #### **Commit Body (optional, for non-trivial changes)**
 - Start after a blank line below title  
 - Wrap lines at ~72 chars  
-- Answer **why** the change was needed, plus **what** was done  
-- Add **justification/trade-offs** if relevant  
-- Mention tricky details if they won't be obvious from the diff  
-- Reference issue/ticket IDs (`Refs #1234`)  
+- **Include information that helps understand the change**:
+  - Why the change was needed (context not obvious from diff)
+  - What problem it solves
+  - Technical details that aid understanding (architecture, trade-offs, security)
+  - Impact on other systems or components
+  - Relevant alternatives considered
+- **Focus on clarity over brevity**: Include what's necessary for understanding, exclude what's obvious
+- Reference issue/ticket IDs (`Refs #1234`) if relevant  
 - Mark breaking changes explicitly with `BREAKING CHANGE:`  
 
-✅ Example:  
+✅ Good Examples:  
+
+**Simple change (minimal context needed):**
 ```
-fix(auth): prevent token expiry during refresh
+fix: correct typo in README.md
+```
 
-Token refresh sometimes failed because we requested a new
-token too late. Added a 30s buffer window to guarantee 
-validity. Chose buffer over retry-loop to avoid extra load.
+**Medium change (some context helpful):**
+```
+feat: add user authentication
 
-Refs #1234
+Add JWT-based authentication with secure password hashing.
+Includes login/logout endpoints and session management.
+```
+
+**Complex change (significant context required):**
+```
+refactor: migrate from monolith to microservices
+
+Split user management and payment processing into separate services
+to improve scalability and reduce deployment risk. Implemented service
+discovery with Consul and added circuit breakers for resilience.
+Chose asynchronous communication over synchronous to handle
+service failures gracefully. This change requires database
+migration and affects all user-facing endpoints.
 ```
 
 #### **Commit Quality Checklist (agent enforces before finalizing)**
@@ -301,6 +321,33 @@ feat: integrate subscription list component
 ```
 feat: integrate subscription list component with sorting, filtering, and summary cards, updated routes to use new component, added TypeScript interfaces, and implemented mock data structure
 ```
+
+## 📋 **Real-World Workflow Example**
+
+### **Actual Commit from This Project**
+```
+docs: add Cline Git Workflow documentation
+
+Create comprehensive CLINE_WORKFLOW.md with intelligent staging
+and commit message generation guidelines. Add clear instruction
+to use --no-pager with git commands when working with Cline to prevent
+interactive pager issues. Includes both Autonomous and User Confirmation
+modes with detailed workflow steps and examples.
+```
+
+**Why this is a perfect example:**
+- **Concise title**: 50 characters, clear intent
+- **Focused body**: 3 sentences, explains "why" and "what"
+- **No implementation details**: Focuses on outcomes, not mechanics
+- **Human-readable**: Easy to understand at a glance
+- **Professional quality**: Matches senior developer standards
+
+### **Workflow Execution That Produced This Commit:**
+1. **Change Assessment**: `git --no-pager status` → Identified CLINE_WORKFLOW.md as untracked
+2. **Intelligent Staging**: `git add CLINE_WORKFLOW.md` → Staged only the workflow file
+3. **Change Validation**: `git --no-pager diff --staged` → Verified staged content
+4. **Commit Generation**: Created concise, human-readable message
+5. **Commit Execution**: Successfully committed with proper formatting
 
 ## 🎯 **Key Benefits**
 
