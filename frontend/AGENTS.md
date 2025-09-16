@@ -36,6 +36,16 @@ This validates your changes using the full project configuration, ensuring:
 - All imports and dependencies are satisfied
 - Production build completes successfully
 
+### **Step 3.5: Browser Validation (If Available)**
+If Playwright MCP tools are available, AI agents can perform automated browser validation:
+- Navigate to the dev server URL and verify implementation
+- Capture screenshots for documentation and visual testing
+- Test navigation and component rendering
+- Monitor console messages for errors
+- Analyze page structure and network requests
+
+This enables a completely different workflow with automated visual validation and comprehensive testing capabilities.
+
 ### **Step 4: Evaluate and Commit**
 - **✅ Passes**: Commit with confidence
   ```bash
