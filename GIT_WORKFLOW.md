@@ -1,4 +1,4 @@
-# Cline Git Workflow
+# Git Workflow
 
 ## 🎯 **Core Philosophy**
 Streamline git commit process with intelligent file staging and user confirmation for final approval.
@@ -332,9 +332,9 @@ feat: integrate subscription list component with sorting, filtering, and summary
 
 ### **Actual Commit from This Project**
 ```
-docs: add Cline Git Workflow documentation
+docs: add Git Workflow documentation
 
-Create comprehensive CLINE_WORKFLOW.md with intelligent staging
+Create comprehensive GIT_WORKFLOW.md with intelligent staging
 and commit message generation guidelines. Add clear instruction
 to use --no-pager with git commands when working with Cline to prevent
 interactive pager issues. Includes both Autonomous and User Confirmation
@@ -349,8 +349,8 @@ modes with detailed workflow steps and examples.
 - **Professional quality**: Matches senior developer standards
 
 ### **Workflow Execution That Produced This Commit:**
-1. **Change Assessment**: `git --no-pager status` → Identified CLINE_WORKFLOW.md as untracked
-2. **Intelligent Staging**: `git add CLINE_WORKFLOW.md` → Staged only the workflow file
+1. **Change Assessment**: `git --no-pager status` → Identified GIT_WORKFLOW.md as untracked
+2. **Intelligent Staging**: `git add GIT_WORKFLOW.md` → Staged only the workflow file
 3. **Change Validation**: `git --no-pager diff --staged` → Verified staged content
 4. **Commit Generation**: Created concise, human-readable message
 5. **Commit Execution**: Successfully committed with proper formatting
