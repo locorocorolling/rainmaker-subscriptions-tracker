@@ -215,10 +215,11 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 
 ## 🔗 **Related Documentation**
 
-- **[Typecheck Commands](#typecheck-commands)**: Available commands and their use cases
-- **[Infrastructure Setup](#infrastructure)**: Path aliases, route types, and configuration
-- **[Troubleshooting](#troubleshooting)**: Common issues and solutions
-- **[Best Practices](#best-practices)**: Guidelines for humans and AI agents
+- **[Frontend Development Workflow](frontend/AGENTS.md)**: Detailed frontend-specific workflow, typecheck commands, infrastructure setup, troubleshooting, and best practices
+- **[Typecheck Commands](frontend/AGENTS.md#typecheck-commands)**: Available commands and their use cases
+- **[Infrastructure Setup](frontend/AGENTS.md#infrastructure)**: Path aliases, route types, and configuration
+- **[Troubleshooting](frontend/AGENTS.md#troubleshooting)**: Common issues and solutions
+- **[Best Practices](frontend/AGENTS.md#best-practices)**: Guidelines for humans and AI agents
 
 ## 🎯 **Benefits**
 
@@ -229,114 +230,6 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 - **Consistent**: Works identically for human contributors and AI agents
 
 This workflow ensures that all changes, whether single file or multi-file, are properly validated before being committed to the codebase.
-
----
-
-## Typecheck Commands
-
-### Available Commands
-
-#### **Full Project Typechecking**
-```bash
-pnpm run typecheck
-# Equivalent: tsc --noEmit
-# Use: Validate entire project
-```
-
-#### **Staged Files Typechecking** ⭐ **RECOMMENDED FOR ITERATIVE WORK**
-```bash
-pnpm run typecheck:staged
-# Equivalent: git diff --cached --name-only --diff-filter=ACM | grep -E '\\.(ts|tsx)$' | sed 's|^frontend/||' | xargs tsc --noEmit
-# Use: Validate only staged files before committing
-```
-
-#### **Full Project with Route Type Generation**
-```bash
-pnpm run typecheck:full
-# Equivalent: react-router typegen && tsc --noEmit
-# Use: Complete validation including route type regeneration
-```
-
-#### **Route Type Generation Only**
-```bash
-pnpm run typecheck:routes
-# Equivalent: react-router typegen
-# Use: Generate React Router route types
-```
-
----
-
-## Infrastructure Setup
-
-### Path Aliases (tsconfig.json)
-```json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./app/*"],
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-- `~/` → `app/` directory (React Router routes)
-- `@/` → `src/` directory (custom components and utilities)
-
-### React Router Route Types
-Route types are automatically generated in `.react-router/types/` and are included in the TypeScript configuration via:
-```json
-{
-  "compilerOptions": {
-    "rootDirs": [".", "./.react-router/types"]
-  }
-}
-```
-
----
-
-## Troubleshooting
-
-### Common Issues:
-1. **"Cannot find module '@/components/ui/xyz'"**
-   - Solution: Ensure path alias is correct and component exists
-   - Use staged typechecking to validate
-
-2. **"Cannot use JSX unless the '--jsx' flag is provided"**
-   - Solution: Don't use single file CLI typechecking
-   - Use staged typechecking instead
-
-3. **"Cannot find module './+types/route'"**
-   - Solution: Run `pnpm run typecheck:routes` to generate route types
-   - Use staged typechecking for validation
-
-### Recovery Steps:
-1. If typecheck fails, read the error messages carefully
-2. Fix the identified issues (imports, dependencies, configuration)
-3. Stage the fixed files and run typecheck again
-4. Only commit when typecheck passes
-
----
-
-## Best Practices
-
-### For Human Contributors:
-1. **Always use staged typechecking** before commits
-2. **Commit frequently** with small, focused changes
-3. **Read type errors carefully** - they're precise and actionable
-4. **Use full project typechecking** for final validation
-
-### For AI Coding Agents:
-1. **Follow the iterative workflow**: modify → stage → typecheck → commit
-2. **Never skip typechecking** - it catches dependency and configuration issues
-3. **Use staged typechecking** for single file validation
-4. **Handle type errors** by fixing the root cause, not bypassing
-
-### For Both:
-- **Trust the type system** - it prevents broken commits
-- **Use the appropriate typecheck command** for your use case
-- **Understand that single file CLI typechecking doesn't work** - use staged approach instead
-- **Keep commits atomic** and focused on single logical changes
 
 ---
 
