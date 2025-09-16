@@ -303,6 +303,7 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 ## 🔗 **Related Documentation**
 
 - **[Frontend Development Workflow](frontend/AGENTS.md)**: Detailed frontend-specific workflow, typecheck commands, infrastructure setup, troubleshooting, and best practices
+- **[Backend Development Workflow](backend/AGENTS.md)**: Backend-specific development workflow, API development, database operations, and server management
 - **[Typecheck Commands](frontend/AGENTS.md#typecheck-commands)**: Available commands and their use cases
 - **[Infrastructure Setup](frontend/AGENTS.md#infrastructure)**: Path aliases, route types, and configuration
 - **[Troubleshooting](frontend/AGENTS.md#troubleshooting)**: Common issues and solutions

@@ -1,32 +1,22 @@
 # Backend Development Workflow
 
-## Core Philosophy
-**Practical type-safe development** with validation at logical checkpoints. Focus on getting working code committed efficiently while maintaining quality.
+## 🚀 **Backend Development Workflow**
 
-## Development Workflow
-
-### Step 1: Make Changes
-- Work on your feature/fix
-- Edit files as needed
-- No need to stage immediately
+### Step 1: Make Backend Changes
+- Work on API endpoints, services, models
+- Edit backend files as needed
 
 ### Step 2: Validate Changes
 ```bash
 # From backend directory
-pnpm run typecheck    # Check all files for TypeScript errors
+pnpm run typecheck    # Check for TypeScript errors
 pnpm run build        # Ensure production build works
 ```
 
-### Step 3: Stage and Commit
+### Step 3: Follow Main Git Workflow
 ```bash
-# Stage relevant files
-git add backend/src/routes/subscriptions.ts backend/src/services/subscription.ts
-
-# Or stage all changes
-git add .
-
-# Commit with conventional format
-git commit -m "feat(backend): implement subscription CRUD endpoints"
+# See ../AGENTS.md for complete git workflow
+# Use conventional commits: feat(backend):, fix(api):, etc.
 ```
 
 ## Essential Commands
@@ -48,44 +38,33 @@ docker-compose logs mongo          # Check MongoDB logs
 docker-compose exec mongo mongosh  # Access MongoDB shell
 ```
 
-### Git Workflow
+### Development
 ```bash
-git --no-pager status              # Check status (no pager)
-git --no-pager diff               # See changes
-git --no-pager log --oneline -10   # See recent commits
+cd backend
+pnpm run dev          # Start development server (port 3001)
+pnpm run typecheck    # TypeScript validation
+# Note: Use ../AGENTS.md for git workflow and commit process
 ```
 
-## Commit Convention
-```
-<type>[scope]: <description>
+## 📋 **Related Documentation**
+- **[Main AGENTS.md](../AGENTS.md)**: Git workflow, commit conventions, and shared development practices
+- **[Commit Workflow](../working-docs/development/COMMIT_WORKFLOW.md)**: Detailed git staging and commit process
 
-Types:
-feat: New feature
-fix: Bug fix
-docs: Documentation
-style: Code style
-refactor: Code restructuring
-test: Testing
-chore: Build/process changes
+## 🔧 **Backend-Specific Commands**
 
-Examples:
-feat(backend): add subscription create endpoint
-fix(api): handle missing subscription id validation
-docs: update API documentation
-refactor(backend): extract subscription service layer
-```
-
-## Environment Setup
+## 🛠 **Environment Setup**
 - **Node Version**: v22+ (`nvm use 22`)
 - **Package Manager**: pnpm
-- **Database**: MongoDB (running in Docker)
+- **Database**: MongoDB (Docker container)
 - **Authentication**: JWT + bcryptjs
+- **Port**: 3001 (backend API)
 
-## Troubleshooting
-- Type errors: Check imports and TypeScript types
-- Build fails: Verify all dependencies are installed
-- Database connection: Ensure Docker containers are running
-- Port conflicts: Check if ports 3000/27017 are available
+## 🔍 **Backend-Specific Troubleshooting**
+- **Type errors**: Check Mongoose schemas and TypeScript types
+- **Build fails**: Verify backend dependencies are installed
+- **Database connection**: Ensure MongoDB Docker container is running
+- **Port conflicts**: Check if port 3001 is available
+- **JWT issues**: Verify JWT_SECRET environment variable
 
 ---
 
