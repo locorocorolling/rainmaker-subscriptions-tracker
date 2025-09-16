@@ -20,16 +20,21 @@ Modify one or more related files to implement a single logical change. Examples:
 git add path/to/file1.tsx path/to/file2.tsx
 ```
 
-### **Step 3: Validate with Staged Typechecking**
+### **Step 3: Validate with Typechecking and Build**
 ```bash
-pnpm run typecheck:staged
+# Run typecheck on all files
+pnpm run typecheck
+
+# Run build to ensure production readiness
+pnpm run build
 ```
 
-This validates only your staged changes using the full project configuration, ensuring:
+This validates your changes using the full project configuration, ensuring:
 - Path aliases resolve correctly (`@/components/ui/card`)
 - JSX configuration works properly
 - React Router route types are available
 - All imports and dependencies are satisfied
+- Production build completes successfully
 
 ### **Step 4: Evaluate and Commit**
 - **✅ Passes**: Commit with confidence
@@ -40,28 +45,31 @@ This validates only your staged changes using the full project configuration, en
 
 ## 📝 **Example Iterations**
 
-### **Single File Iteration**
+### **Single Component Iteration**
 ```bash
-# Add Card component to subscriptions route
-git add app/routes/subscriptions.tsx
-pnpm run typecheck:staged
-git commit -m "feat: add Card component to subscriptions page"
+# Add Card component to home route
+git add src/components/ui/card.tsx src/lib/utils.ts
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Card components in home page"
 ```
 
-### **Multi-File Iteration**
+### **Multi-Component Iteration**
 ```bash
-# Add Button component and update multiple pages to use it
-git add src/components/ui/button.tsx app/routes/home.tsx app/routes/subscriptions.tsx
-pnpm run typecheck:staged
-git commit -m "feat: add Button component and integrate across pages"
+# Add Button component and update pages to use it
+git add src/components/ui/button.tsx app/routes/home.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Button components in home page"
 ```
 
 ### **Feature Iteration**
 ```bash
 # Complete feature: new component + route + integration
-git add src/components/ui/table.tsx app/routes/subscriptions.tsx src/lib/utils.ts
-pnpm run typecheck:staged
-git commit -m "feat: add subscription table with sorting and filtering"
+git add src/components/ui/badge.tsx app/routes/subscriptions.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: enhance subscriptions page with Card, Button, and Badge components"
 ```
 
 ## ⚠️ **Important: TypeScript CLI Limitations**
@@ -75,7 +83,7 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 
 **Why**: TypeScript CLI doesn't allow mixing project configuration with source files, so single file typechecking doesn't load tsconfig.json properly.
 
-**Solution**: Always use `pnpm run typecheck:staged` for iterative validation.
+**Solution**: Always use `pnpm run typecheck` for full project validation.
 
 ## 🔗 **Related Documentation**
 
@@ -86,10 +94,11 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 
 ## 🎯 **Benefits**
 
-- **Zero Broken Commits**: Typechecking prevents committing broken code
+- **Zero Broken Commits**: Typechecking and build prevent committing broken code
 - **Manageable Verification**: Small surface area is easy to review and validate
-- **Fast Feedback**: Staged typechecking provides quick validation
+- **Fast Feedback**: Typechecking provides quick validation
 - **Type Safety**: All dependencies and imports are validated at each step
+- **Production Ready**: Build step ensures changes work in production
 - **Consistent**: Works identically for human contributors and AI agents
 
 This workflow ensures that all changes, whether single file or multi-file, are properly validated before being committed to the codebase.
@@ -100,18 +109,11 @@ This workflow ensures that all changes, whether single file or multi-file, are p
 
 ### Available Commands
 
-#### **Full Project Typechecking**
+#### **Full Project Typechecking** ⭐ **RECOMMENDED FOR ITERATIVE WORK**
 ```bash
 pnpm run typecheck
 # Equivalent: tsc --noEmit
-# Use: Validate entire project
-```
-
-#### **Staged Files Typechecking** ⭐ **RECOMMENDED FOR ITERATIVE WORK**
-```bash
-pnpm run typecheck:staged
-# Equivalent: git diff --cached --name-only --diff-filter=ACM | grep -E '\\.(ts|tsx)$' | sed 's|^frontend/||' | xargs tsc --noEmit
-# Use: Validate only staged files before committing
+# Use: Validate entire project before committing
 ```
 
 #### **Full Project with Route Type Generation**
@@ -127,6 +129,10 @@ pnpm run typecheck:routes
 # Equivalent: react-router typegen
 # Use: Generate React Router route types
 ```
+
+### **Removed Commands**
+The following command was removed due to complexity and reliability issues:
+- `typecheck:staged` - Replaced with simpler `typecheck` + `build` workflow
 
 ---
 
@@ -164,40 +170,49 @@ Route types are automatically generated in `.react-router/types/` and are includ
 ### Common Issues:
 1. **"Cannot find module '@/components/ui/xyz'"**
    - Solution: Ensure path alias is correct and component exists
-   - Use staged typechecking to validate
+   - Use full project typechecking to validate
 
 2. **"Cannot use JSX unless the '--jsx' flag is provided"**
    - Solution: Don't use single file CLI typechecking
-   - Use staged typechecking instead
+   - Use full project typechecking instead
 
 3. **"Cannot find module './+types/route'"**
    - Solution: Run `pnpm run typecheck:routes` to generate route types
-   - Use staged typechecking for validation
+   - Use full project typechecking for validation
+
+4. **IDE TypeScript Errors vs Command Line Success**
+   - Solution: Reload IDE window to refresh TypeScript server
+   - This can happen when opening workspace from root level in monorepo setups
 
 ### Recovery Steps:
 1. If typecheck fails, read the error messages carefully
 2. Fix the identified issues (imports, dependencies, configuration)
 3. Stage the fixed files and run typecheck again
-4. Only commit when typecheck passes
+4. Run build to ensure production readiness
+5. Only commit when both typecheck and build pass
 
 ---
 
 ## Best Practices
 
 ### For Human Contributors:
-1. **Always use staged typechecking** before commits
-2. **Commit frequently** with small, focused changes
-3. **Read type errors carefully** - they're precise and actionable
-4. **Use full project typechecking** for final validation
+1. **Always use full project typechecking** before commits
+2. **Run build command** to ensure production readiness
+3. **Commit frequently** with small, focused changes
+4. **Read type errors carefully** - they're precise and actionable
+5. **Reload IDE window** if TypeScript errors don't match command line results
 
 ### For AI Coding Agents:
-1. **Follow the iterative workflow**: modify → stage → typecheck → commit
+1. **Follow the iterative workflow**: modify → stage → typecheck → build → commit
 2. **Never skip typechecking** - it catches dependency and configuration issues
-3. **Use staged typechecking** for single file validation
+3. **Always run build** - ensures changes work in production
 4. **Handle type errors** by fixing the root cause, not bypassing
+5. **Use full project typechecking** for validation
 
 ### For Both:
 - **Trust the type system** - it prevents broken commits
 - **Use the appropriate typecheck command** for your use case
-- **Understand that single file CLI typechecking doesn't work** - use staged approach instead
+- **Understand that single file CLI typechecking doesn't work** - use full project approach instead
 - **Keep commits atomic** and focused on single logical changes
+- **Build before committing** to catch production issues early
+- **Reload IDE** when TypeScript server gets out of sync

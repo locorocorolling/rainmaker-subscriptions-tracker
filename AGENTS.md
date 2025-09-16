@@ -156,16 +156,21 @@ Modify one or more related files to implement a single logical change. Examples:
 git add path/to/file1.tsx path/to/file2.tsx
 ```
 
-### **Step 3: Validate with Staged Typechecking**
+### **Step 3: Validate with Typechecking and Build**
 ```bash
-pnpm run typecheck:staged
+# Run typecheck on all files
+pnpm run typecheck
+
+# Run build to ensure production readiness
+pnpm run build
 ```
 
-This validates only your staged changes using the full project configuration, ensuring:
+This validates your changes using the full project configuration, ensuring:
 - Path aliases resolve correctly (`@/components/ui/card`)
 - JSX configuration works properly
 - React Router route types are available
 - All imports and dependencies are satisfied
+- Production build completes successfully
 
 ### **Step 4: Evaluate and Commit**
 - **✅ Passes**: Commit with confidence
@@ -176,28 +181,31 @@ This validates only your staged changes using the full project configuration, en
 
 ## 📝 **Example Iterations**
 
-### **Single File Iteration**
+### **Single Component Iteration**
 ```bash
-# Add Card component to subscriptions route
-git add app/routes/subscriptions.tsx
-pnpm run typecheck:staged
-git commit -m "feat: add Card component to subscriptions page"
+# Add Card component to home route
+git add src/components/ui/card.tsx src/lib/utils.ts
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Card components in home page"
 ```
 
-### **Multi-File Iteration**
+### **Multi-Component Iteration**
 ```bash
-# Add Button component and update multiple pages to use it
-git add src/components/ui/button.tsx app/routes/home.tsx app/routes/subscriptions.tsx
-pnpm run typecheck:staged
-git commit -m "feat: add Button component and integrate across pages"
+# Add Button component and update pages to use it
+git add src/components/ui/button.tsx app/routes/home.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: integrate Button components in home page"
 ```
 
 ### **Feature Iteration**
 ```bash
 # Complete feature: new component + route + integration
-git add src/components/ui/table.tsx app/routes/subscriptions.tsx src/lib/utils.ts
-pnpm run typecheck:staged
-git commit -m "feat: add subscription table with sorting and filtering"
+git add src/components/ui/badge.tsx app/routes/subscriptions.tsx
+pnpm run typecheck
+pnpm run build
+git commit -m "feat: enhance subscriptions page with Card, Button, and Badge components"
 ```
 
 ## ⚠️ **Important: TypeScript CLI Limitations**
@@ -211,7 +219,7 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 
 **Why**: TypeScript CLI doesn't allow mixing project configuration with source files, so single file typechecking doesn't load tsconfig.json properly.
 
-**Solution**: Always use `pnpm run typecheck:staged` for iterative validation.
+**Solution**: Always use `pnpm run typecheck` for full project validation.
 
 ## 🔗 **Related Documentation**
 
@@ -223,10 +231,11 @@ npx tsc --noEmit -p tsconfig.json app/routes/subscriptions.tsx
 
 ## 🎯 **Benefits**
 
-- **Zero Broken Commits**: Typechecking prevents committing broken code
+- **Zero Broken Commits**: Typechecking and build prevent committing broken code
 - **Manageable Verification**: Small surface area is easy to review and validate
-- **Fast Feedback**: Staged typechecking provides quick validation
+- **Fast Feedback**: Typechecking provides quick validation
 - **Type Safety**: All dependencies and imports are validated at each step
+- **Production Ready**: Build step ensures changes work in production
 - **Consistent**: Works identically for human contributors and AI agents
 
 This workflow ensures that all changes, whether single file or multi-file, are properly validated before being committed to the codebase.
