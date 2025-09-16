@@ -1,4 +1,4 @@
-# AI Agent Instructions for Subscription Management Tool
+# AI Agent Instructions for Subscription Tracker
 
 ## Project Context
 - **Interview project** with Rainmaker (16-20 hours total)

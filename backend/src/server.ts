@@ -63,7 +63,7 @@ app.get('/health', (req, res) => {
 // Basic API info endpoint
 app.get('/api', (req, res) => {
   res.json({
-    message: 'Subscription Management API',
+    message: 'Subscription Tracker API',
     version: '1.0.0',
     endpoints: {
       health: '/health',

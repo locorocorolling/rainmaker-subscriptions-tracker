@@ -6,8 +6,8 @@ export default function Home() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Subscription Manager</h1>
-        <p className="text-gray-600">Manage all your subscriptions in one place</p>
+        <h1 className="text-3xl font-bold mb-2">Subscription Tracker</h1>
+        <p className="text-gray-600">Track all your subscriptions in one place</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

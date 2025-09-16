@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Subscription Management Tool Backend API",
+  "description": "Subscription Tracker Backend API",
   "type": "module",
   "packageManager": "pnpm@10.7.0",
   "scripts": {

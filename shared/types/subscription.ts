@@ -1,5 +1,5 @@
 /**
- * Core Subscription types for the Subscription Management Tool
+ * Core Subscription types for the Subscription Tracker
  * Handles edge cases: N-day billing cycles, end-of-month subscriptions
  */
 

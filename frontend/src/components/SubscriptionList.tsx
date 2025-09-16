@@ -238,7 +238,7 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
         <CardHeader>
           <CardTitle>Subscriptions</CardTitle>
           <CardDescription>
-            Manage all your subscriptions in one place
+            Track all your subscriptions in one place
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,5 +1,5 @@
 /**
- * Analytics and payment-related types for the Subscription Management Tool
+ * Analytics and payment-related types for the Subscription Tracker
  */
 
 // Payment history record

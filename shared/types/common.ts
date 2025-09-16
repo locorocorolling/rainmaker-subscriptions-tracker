@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for common functionality across the Subscription Management Tool
+ * Shared TypeScript types for common functionality across the Subscription Tracker
  */
 
 // API response types

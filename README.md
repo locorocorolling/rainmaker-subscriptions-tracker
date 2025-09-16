@@ -1,4 +1,4 @@
-# Subscription Management Tool
+# Subscription Tracker
 
 Interview project for Rainmaker (16-20 hours total)
 
