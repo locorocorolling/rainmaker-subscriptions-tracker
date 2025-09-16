@@ -32,10 +32,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
+      <body className="min-h-screen bg-gray-50">
+        <div className="min-h-screen flex flex-col">
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+        </div>
       </body>
     </html>
   );
