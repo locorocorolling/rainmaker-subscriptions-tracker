@@ -1,7 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 // Interface for Mongoose document
-interface IUserDocument extends Document {
+export interface IUserDocument extends Document {
   email: string;
   password: string;
   firstName: string;
@@ -66,7 +66,6 @@ const UserSchema = new Schema<IUserDocument>({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
     trim: true,
     validate: {
@@ -96,8 +95,7 @@ const UserSchema = new Schema<IUserDocument>({
   },
   isActive: {
     type: Boolean,
-    default: true,
-    index: true
+    default: true
   },
   lastLogin: {
     type: Date
@@ -111,11 +109,12 @@ const UserSchema = new Schema<IUserDocument>({
   timestamps: true,
   toJSON: {
     transform: function(doc, ret) {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
-      delete ret.password;
-      return ret;
+      if (ret._id) {
+        ret.id = ret._id.toString();
+      }
+      // Use object spread to omit properties
+      const { _id, __v, password, ...result } = ret;
+      return result;
     }
   }
 });
@@ -130,9 +129,9 @@ UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   try {
-    const bcrypt = await import('bcrypt');
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
+    const bcryptjs = await import('bcryptjs');
+    const salt = await bcryptjs.genSalt(12);
+    this.password = await bcryptjs.hash(this.password, salt);
     next();
   } catch (error) {
     next(error as Error);
@@ -142,8 +141,8 @@ UserSchema.pre('save', async function(next) {
 // Method to compare password
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   try {
-    const bcrypt = await import('bcrypt');
-    return await bcrypt.compare(candidatePassword, this.password);
+    const bcryptjs = await import('bcryptjs');
+    return await bcryptjs.compare(candidatePassword, this.password);
   } catch (error) {
     throw error;
   }

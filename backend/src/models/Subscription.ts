@@ -8,7 +8,9 @@ import {
 } from '../../../shared/types/subscription';
 
 // Interface for Mongoose document
-interface ISubscriptionDocument extends Subscription, Document {}
+export interface ISubscriptionDocument extends Omit<Subscription, 'id'>, Document {
+  id: string;
+}
 
 // Money type schema
 const MoneySchema = new Schema({
@@ -36,12 +38,23 @@ const BillingCycleSchema = new Schema({
     type: Number,
     required: true,
     min: 1,
-    max: function(this: { unit: string }) {
-      switch(this.unit) {
-        case 'day': return 365;
-        case 'month': return 12;
-        case 'year': return 5;
-        default: return 365;
+    max: 365,
+    validate: {
+      validator: function(this: { unit: string }, v: number) {
+        switch(this.unit) {
+          case 'day': return v <= 365;
+          case 'month': return v <= 12;
+          case 'year': return v <= 5;
+          default: return v <= 365;
+        }
+      },
+      message: function(this: { unit: string }) {
+        switch(this.unit) {
+          case 'day': return 'Day value cannot exceed 365';
+          case 'month': return 'Month value cannot exceed 12';
+          case 'year': return 'Year value cannot exceed 5';
+          default: return 'Value cannot exceed 365';
+        }
       }
     }
   },
@@ -171,8 +184,7 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
   status: {
     type: String,
     enum: ['active', 'paused', 'cancelled', 'expired'],
-    default: 'active',
-    index: true
+    default: 'active'
   },
   metadata: {
     type: MetadataSchema,
@@ -183,10 +195,12 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
   timestamps: true,
   toJSON: {
     transform: function(doc, ret) {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
-      return ret;
+      if (ret._id) {
+        ret.id = ret._id.toString();
+      }
+      // Use object spread to omit properties
+      const { _id, __v, ...result } = ret;
+      return result;
     }
   }
 });

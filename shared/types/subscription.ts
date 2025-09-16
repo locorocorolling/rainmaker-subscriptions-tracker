@@ -79,6 +79,8 @@ export interface UpdateSubscriptionInput {
   category?: string;
   cost?: Money;
   billingCycle?: BillingCycle;
+  firstBillingDate?: Date;
+  nextRenewal?: Date;
   endOfMonthStrategy?: EndOfMonthStrategy;
   status?: SubscriptionStatus;
   metadata?: Subscription['metadata'];
