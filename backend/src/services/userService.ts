@@ -20,6 +20,7 @@ interface UpdateUserInput {
     notifications?: {
       email?: boolean;
       renewalReminders?: boolean;
+      reminderDays?: number;
     };
   };
 }

@@ -11,6 +11,7 @@ import { connectMongoDB, checkMongoDBHealth } from './utils/database';
 import { config } from './utils/config';
 import authRoutes from './routes/auth';
 import subscriptionRoutes from './routes/subscriptions';
+import userRoutes from './routes/user';
 import { BackgroundJobService } from './services/backgroundJobService';
 
 // Load environment variables
@@ -269,6 +270,10 @@ const swaggerOptions = {
         description: 'User authentication endpoints'
       },
       {
+        name: 'User',
+        description: 'User preferences and settings endpoints'
+      },
+      {
         name: 'Subscriptions',
         description: 'Subscription management endpoints'
       },
@@ -444,6 +449,7 @@ app.get('/api', (req, res) => {
       api: '/api',
       docs: config.NODE_ENV !== 'production' ? '/api-docs' : undefined,
       auth: '/api/auth',
+      user: '/api/user',
       subscriptions: '/api/subscriptions'
     }
   });
@@ -451,6 +457,9 @@ app.get('/api', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// User routes
+app.use('/api/user', userRoutes);
 
 // Subscription routes
 app.use('/api/subscriptions', subscriptionRoutes);

@@ -1,0 +1,230 @@
+import { Router, Request, Response } from 'express';
+import Joi from 'joi';
+import { UserService } from '../services/userService';
+import { authenticateToken } from '../middleware/auth';
+
+const router: Router = Router();
+
+// Validation schema for preferences
+const preferencesSchema = Joi.object({
+  theme: Joi.string().valid('light', 'dark', 'auto'),
+  currency: Joi.string().pattern(/^[A-Z]{3}$/),
+  timezone: Joi.string(),
+  notifications: Joi.object({
+    email: Joi.boolean(),
+    renewalReminders: Joi.boolean(),
+    reminderDays: Joi.number().integer().min(1).max(30)
+  })
+});
+
+const notificationsSchema = Joi.object({
+  email: Joi.boolean(),
+  renewalReminders: Joi.boolean(),
+  reminderDays: Joi.number().integer().min(1).max(30)
+});
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   get:
+ *     summary: Get user preferences
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User preferences retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 preferences:
+ *                   type: object
+ *                   properties:
+ *                     theme:
+ *                       type: string
+ *                       enum: [light, dark, auto]
+ *                     currency:
+ *                       type: string
+ *                     timezone:
+ *                       type: string
+ *                     notifications:
+ *                       type: object
+ *                       properties:
+ *                         email:
+ *                           type: boolean
+ *                         renewalReminders:
+ *                           type: boolean
+ *                         reminderDays:
+ *                           type: number
+ *       401:
+ *         description: Unauthorized
+ */
+// Get user preferences
+router.get('/preferences', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const user = await UserService.findActiveById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.json({
+      preferences: user.preferences
+    });
+  } catch (error) {
+    console.error('Get preferences error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   put:
+ *     summary: Update user preferences
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               theme:
+ *                 type: string
+ *                 enum: [light, dark, auto]
+ *               currency:
+ *                 type: string
+ *               timezone:
+ *                 type: string
+ *               notifications:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: boolean
+ *                   renewalReminders:
+ *                     type: boolean
+ *                   reminderDays:
+ *                     type: number
+ *                     minimum: 1
+ *                     maximum: 30
+ *     responses:
+ *       200:
+ *         description: Preferences updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+// Update user preferences
+router.put('/preferences', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { error } = preferencesSchema.validate(req.body);
+    if (error) {
+      res.status(400).json({
+        message: 'Validation error',
+        details: error.details[0].message
+      });
+      return;
+    }
+
+    const userId = (req as any).user.userId;
+
+    const updatedUser = await UserService.updatePreferences(userId, req.body);
+    if (!updatedUser) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.json({
+      message: 'Preferences updated successfully',
+      preferences: updatedUser.preferences
+    });
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/user/preferences/notifications:
+ *   patch:
+ *     summary: Update only notification preferences
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: boolean
+ *               renewalReminders:
+ *                 type: boolean
+ *               reminderDays:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 30
+ *     responses:
+ *       200:
+ *         description: Notification preferences updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+// Update notification preferences only
+router.patch('/preferences/notifications', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { error } = notificationsSchema.validate(req.body);
+    if (error) {
+      res.status(400).json({
+        message: 'Validation error',
+        details: error.details[0].message
+      });
+      return;
+    }
+
+    const userId = (req as any).user.userId;
+
+    // Get current preferences
+    const currentUser = await UserService.findActiveById(userId);
+    if (!currentUser) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Merge notification updates with existing preferences
+    const updatedNotifications = {
+      ...currentUser.preferences?.notifications,
+      ...req.body
+    };
+
+    const updatedPreferences = {
+      ...currentUser.preferences,
+      notifications: updatedNotifications
+    };
+
+    const updatedUser = await UserService.updatePreferences(userId, updatedPreferences);
+
+    res.json({
+      message: 'Notification preferences updated successfully',
+      notifications: updatedUser?.preferences?.notifications
+    });
+  } catch (error) {
+    console.error('Update notification preferences error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+export default router;

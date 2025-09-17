@@ -16,6 +16,7 @@ export interface IUserDocument extends Document {
     notifications: {
       email: boolean;
       renewalReminders: boolean;
+      reminderDays?: number;
     };
   };
   createdAt: Date;
@@ -53,6 +54,17 @@ const PreferencesSchema = new Schema({
     renewalReminders: {
       type: Boolean,
       default: true
+    },
+    reminderDays: {
+      type: Number,
+      min: 1,
+      max: 30,
+      validate: {
+        validator: function(v: number) {
+          return !v || (Number.isInteger(v) && v >= 1 && v <= 30);
+        },
+        message: 'Reminder days must be an integer between 1 and 30'
+      }
     }
   }
 }, { _id: false });

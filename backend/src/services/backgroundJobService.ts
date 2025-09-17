@@ -104,18 +104,39 @@ export class BackgroundJobService {
     try {
       logger.info('Starting renewal reminder check...');
 
-      const reminderDays = config.NOTIFICATION_REMINDER_DAYS;
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + reminderDays);
+      // Find all active users with notification preferences
+      const usersWithNotifications = await UserModel.find({
+        isActive: true,
+        'preferences.notifications.email': true,
+        'preferences.notifications.renewalReminders': true
+      });
 
-      // Find all active subscriptions that are due for renewal reminder
-      const subscriptionsNeedingReminder = await SubscriptionModel.find({
-        nextRenewal: {
-          $lte: targetDate,
-          $gte: new Date(), // Only future renewals
-        },
-        status: 'active',
-      }).populate('userId');
+      logger.info(`Found ${usersWithNotifications.length} users with notifications enabled`);
+
+      let subscriptionsNeedingReminder: any[] = [];
+
+      // For each user, find their subscriptions within their reminder period
+      for (const user of usersWithNotifications) {
+        const userReminderDays = user.preferences?.notifications?.reminderDays || config.NOTIFICATION_REMINDER_DAYS;
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + userReminderDays);
+
+        const userSubscriptions = await SubscriptionModel.find({
+          userId: user._id,
+          nextRenewal: {
+            $lte: targetDate,
+            $gte: new Date(), // Only future renewals
+          },
+          status: 'active',
+        });
+
+        // Attach user data to each subscription for later processing
+        userSubscriptions.forEach(sub => {
+          (sub as any).userId = user; // Replace ObjectId with user document
+        });
+
+        subscriptionsNeedingReminder.push(...userSubscriptions);
+      }
 
       logger.info(`Found ${subscriptionsNeedingReminder.length} subscriptions needing renewal reminders`);
 
@@ -124,13 +145,7 @@ export class BackgroundJobService {
 
       for (const subscription of subscriptionsNeedingReminder) {
         try {
-          const user = subscription.userId as unknown as IUserDocument; // This will be populated user data
-
-          // Check if user wants renewal reminders
-          if (!user.preferences?.notifications?.renewalReminders || !user.preferences?.notifications?.email) {
-            logger.debug(`Skipping email for user ${user.email} - notifications disabled`);
-            continue;
-          }
+          const user = subscription.userId as unknown as IUserDocument; // User data attached in previous step
 
           const daysUntilRenewal = Math.ceil(
             (subscription.nextRenewal.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
