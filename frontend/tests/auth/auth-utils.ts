@@ -19,7 +19,7 @@ export class AuthUtils {
     this.signInButton = page.locator('button', { hasText: 'Sign In' });
     this.authModal = page.locator('[role="dialog"]');
     this.emailInput = page.locator('input[type="email"]');
-    this.passwordInput = page.locator('input[type="password"]');
+    this.passwordInput = page.locator('input#password');
     this.submitButton = page.locator('button[type="submit"]');
     this.registerTab = page.locator('button', { hasText: 'Sign up' });
     this.loginTab = page.locator('button', { hasText: 'Sign in' });
