@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import Cleave from "cleave.js/react"
 import {
   Select,
   SelectContent,
@@ -296,7 +297,7 @@ export function SubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 text-foreground border-border">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 text-foreground border-border">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
@@ -341,94 +342,108 @@ export function SubscriptionForm({
               />
 
 
-              <div className="grid grid-cols-2 gap-4">
+
+              {/* Responsive Cost + Billing Cycle Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Move cost field here to be beside billing cycle */}
+                <div className="space-y-2">
+                  <label className="text-base font-medium">Cost<span className="text-amber-500 ml-0.5">*</span></label>
+                  <div className="flex relative">
+                    <FormField
+                      control={form.control}
+                      name="cost.amount"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Cleave
+                              placeholder="9.99"
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-r-none border-r-0 focus:z-20 relative"
+                              options={{
+                                numeral: true,
+                                numeralThousandsGroupStyle: 'thousand',
+                                numeralDecimalScale: 2,
+                                numeralDecimalMark: '.',
+                                delimiter: ',',
+                              }}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                // Extract raw numeric value (remove formatting)
+                                const rawValue = e.target.rawValue || '0'
+                                field.onChange(parseFloat(rawValue) || 0)
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cost.currency"
+                      render={({ field }) => (
+                        <FormItem className="w-20">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-l-none border-l-0 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:z-20 relative">
+                                <SelectValue placeholder="USD" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="min-w-[--radix-select-trigger-width] w-[--radix-select-trigger-width]">
+                              {currencies.map((currency) => {
+                                const isSelected = field.value === currency
+                                return (
+                                  <SelectItem key={currency} value={currency}>
+                                    {currency}
+                                  </SelectItem>
+                                )
+                              })}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="cost.amount"
+                  name="billingCycle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">Cost Amount<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                      <FormLabel className="text-base font-medium">Billing Cycle<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="9.99"
-                          {...field}
-                          value={field.value?.toString() || ""}
-                          onChange={(e) => {
-                            const value = e.target.value === "" ? 0 : parseFloat(e.target.value)
-                            field.onChange(isNaN(value) ? 0 : value)
+                        <Select
+                          onValueChange={(value) => {
+                            if (value === "monthly") {
+                              field.onChange({ value: 1, unit: "month" })
+                            } else if (value === "annually") {
+                              field.onChange({ value: 1, unit: "year" })
+                            } else if (value === "custom") {
+                              field.onChange({ value: 7, unit: "day" })
+                            }
                           }}
-                        />
+                          value={
+                            field.value?.value === 1 && field.value?.unit === "month" ? "monthly" :
+                            field.value?.value === 1 && field.value?.unit === "year" ? "annually" :
+                            field.value?.unit === "day" ? "custom" : "monthly"
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select billing cycle" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="annually">Annually</SelectItem>
+                            <SelectItem value="custom">Every N days</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="cost.currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">Currency<span className="text-amber-500 ml-0.5">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {currencies.map((currency) => (
-                            <SelectItem key={currency} value={currency}>
-                              {currency}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
-
-              <FormField
-                control={form.control}
-                name="billingCycle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">Billing Cycle<span className="text-amber-500 ml-0.5">*</span></FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          if (value === "monthly") {
-                            field.onChange({ value: 1, unit: "month" })
-                          } else if (value === "annually") {
-                            field.onChange({ value: 1, unit: "year" })
-                          } else if (value === "custom") {
-                            field.onChange({ value: 7, unit: "day" })
-                          }
-                        }}
-                        value={
-                          field.value?.value === 1 && field.value?.unit === "month" ? "monthly" :
-                          field.value?.value === 1 && field.value?.unit === "year" ? "annually" :
-                          field.value?.unit === "day" ? "custom" : "monthly"
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select billing cycle" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="annually">Annually</SelectItem>
-                          <SelectItem value="custom">Every N days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               {/* Show custom days input when "Every N days" is selected */}
               <FormField
