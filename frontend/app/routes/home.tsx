@@ -62,7 +62,12 @@ export default function Home() {
       </div>
 
       {user ? (
-        stats.activeCount === 0 && !isLoading ? (
+        isLoading ? (
+          /* Loading State */
+          <div className="flex items-center justify-center py-20">
+            <div className="text-lg">Loading...</div>
+          </div>
+        ) : stats.activeCount === 0 ? (
           /* Empty State: Only Getting Started */
           <div className="max-w-4xl mx-auto">
             <GettingStartedSuggestions onAddSubscription={() => setIsAddDialogOpen(true)} />
