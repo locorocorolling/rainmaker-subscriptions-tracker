@@ -1,6 +1,7 @@
 import * as cron from 'node-cron';
 import { UserModel, IUserDocument } from '../models/User';
 import { SubscriptionModel } from '../models/Subscription';
+import { SubscriptionService } from './subscription';
 import { EmailService } from './emailService';
 import { config } from '../utils/config';
 import { createLogger, format, transports } from 'winston';
@@ -37,17 +38,25 @@ export class BackgroundJobService {
       timezone: 'UTC'
     });
 
+    // Daily job to process actual renewals (runs at 2:00 AM every day)
+    const renewalProcessingJob = cron.schedule('0 2 * * *', async () => {
+      await this.processSubscriptionRenewals();
+    }, {
+      timezone: 'UTC'
+    });
+
     // Development job that runs every minute for testing
     const devTestJob = cron.schedule('* * * * *', async () => {
       if (config.NODE_ENV === 'development') {
         logger.debug('Development test job running...');
         // Uncomment for testing: await this.checkRenewalReminders();
+        // Uncomment for testing: await this.processSubscriptionRenewals();
       }
     }, {
       timezone: 'UTC'
     });
 
-    this.jobs = [dailyRenewalJob, devTestJob];
+    this.jobs = [dailyRenewalJob, renewalProcessingJob, devTestJob];
 
     // Start all jobs
     this.jobs.forEach(job => job.start());
@@ -160,10 +169,29 @@ export class BackgroundJobService {
   }
 
   /**
+   * Process subscription renewals that are due
+   */
+  private static async processSubscriptionRenewals() {
+    try {
+      logger.info('Starting subscription renewal processing...');
+
+      const result = await SubscriptionService.processRenewals();
+
+      logger.info('Subscription renewal processing completed', {
+        renewed: result.renewed,
+        failed: result.failed,
+        total: result.renewed + result.failed
+      });
+    } catch (error) {
+      logger.error('Subscription renewal processing failed', { error });
+    }
+  }
+
+  /**
    * Get a human-readable name for a job
    */
   private static getJobName(index: number): string {
-    const names = ['Daily Renewal Reminders', 'Development Test'];
+    const names = ['Daily Renewal Reminders', 'Renewal Processing', 'Development Test'];
     return names[index] || `Job ${index}`;
   }
 
@@ -173,5 +201,13 @@ export class BackgroundJobService {
   static async triggerRenewalCheck() {
     logger.info('Manually triggering renewal reminder check...');
     await this.checkRenewalReminders();
+  }
+
+  /**
+   * Manually trigger renewal processing (for testing)
+   */
+  static async triggerRenewalProcessing() {
+    logger.info('Manually triggering subscription renewal processing...');
+    await this.processSubscriptionRenewals();
   }
 }
