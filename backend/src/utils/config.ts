@@ -9,7 +9,7 @@ export const config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
 
   // Database
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/subscription_tracker?authSource=admin',
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://app_user:app_password@localhost:27017/subscription_tracker?authSource=subscription_tracker',
   MONGODB_TEST_URI: process.env.MONGODB_TEST_URI || 'mongodb://admin:password@localhost:27017/subscription_tracker_test?authSource=admin',
 
   // Redis

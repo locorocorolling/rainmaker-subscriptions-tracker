@@ -82,13 +82,11 @@ router.post('/register', async (req: Request, res: Response) => {
       return;
     }
 
-    const hashedPassword = await hashPassword(password);
-
     const user = new UserModel({
       firstName: name,
       lastName: '',
       email,
-      password: hashedPassword
+      password: password // Let the model's pre-save middleware handle hashing
     });
 
     await user.save();
@@ -164,7 +162,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email }).select('+password');
     if (!user) {
       res.status(401).json({ message: 'Invalid credentials' });
       return;

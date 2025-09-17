@@ -12,8 +12,8 @@ const logger = createLogger({
   transports: [new transports.Console()],
 });
 
-// Initialize Resend
-const resend = new Resend(config.RESEND_API_KEY);
+// Initialize Resend (only if API key is provided)
+const resend = config.RESEND_API_KEY ? new Resend(config.RESEND_API_KEY) : null;
 
 // Email templates
 const emailTemplates = {
@@ -132,6 +132,14 @@ export class EmailService {
     daysUntilRenewal: number;
   }) {
     try {
+      if (!resend) {
+        logger.warn('Email service not configured, skipping renewal reminder', {
+          to,
+          subscriptionName,
+        });
+        return { data: { id: 'mock' } };
+      }
+
       const subject = `Reminder: ${subscriptionName} renews in ${daysUntilRenewal} days`;
       const html = emailTemplates.renewalReminder({
         userName,

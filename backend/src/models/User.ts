@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 // Interface for Mongoose document
 export interface IUserDocument extends Document {
@@ -84,7 +85,8 @@ const UserSchema = new Schema<IUserDocument>({
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
+    default: '',
     trim: true,
     maxlength: 50
   },
@@ -124,9 +126,8 @@ UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   try {
-    const bcryptjs = await import('bcryptjs');
-    const salt = await bcryptjs.genSalt(12);
-    this.password = await bcryptjs.hash(this.password, salt);
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error as Error);
@@ -136,8 +137,7 @@ UserSchema.pre('save', async function(next) {
 // Method to compare password
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   try {
-    const bcryptjs = await import('bcryptjs');
-    return await bcryptjs.compare(candidatePassword, this.password);
+    return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
     throw error;
   }
