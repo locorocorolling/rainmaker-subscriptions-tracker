@@ -1,5 +1,5 @@
 import * as cron from 'node-cron';
-import { UserModel } from '../models/User';
+import { UserModel, IUserDocument } from '../models/User';
 import { SubscriptionModel } from '../models/Subscription';
 import { EmailService } from './emailService';
 import { config } from '../utils/config';
@@ -115,7 +115,7 @@ export class BackgroundJobService {
 
       for (const subscription of subscriptionsNeedingReminder) {
         try {
-          const user = subscription.userId as any; // This will be populated user data
+          const user = subscription.userId as unknown as IUserDocument; // This will be populated user data
 
           // Check if user wants renewal reminders
           if (!user.preferences?.notifications?.renewalReminders || !user.preferences?.notifications?.email) {
