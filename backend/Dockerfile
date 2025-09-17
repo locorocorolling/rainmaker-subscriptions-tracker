@@ -1,4 +1,4 @@
-# Multi-stage build for production
+# Multi-stage build for backend
 FROM node:22-alpine AS base
 
 # Install pnpm and curl for health checks
@@ -28,13 +28,13 @@ RUN pnpm build
 FROM base AS development
 COPY --from=development-dependencies /app/node_modules ./node_modules
 COPY . .
-EXPOSE 5173
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+EXPOSE 3001
+CMD ["pnpm", "dev"]
 
 # Production stage
 FROM base AS production
 COPY --from=production-dependencies /app/node_modules ./node_modules
-COPY --from=build /app/build ./build
+COPY --from=build /app/dist ./dist
 COPY package.json ./
-EXPOSE 3000
+EXPOSE 3001
 CMD ["pnpm", "start"]

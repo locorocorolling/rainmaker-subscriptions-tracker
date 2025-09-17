@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Cleave from "cleave.js/react"
+import type { ChangeEvent } from "cleave.js/react/props"
 import {
   Select,
   SelectContent,
@@ -366,7 +367,7 @@ export function SubscriptionForm({
                                 delimiter: ',',
                               }}
                               value={field.value || ''}
-                              onChange={(e) => {
+                              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                 // Extract raw numeric value (remove formatting)
                                 const rawValue = e.target.rawValue || '0'
                                 field.onChange(parseFloat(rawValue) || 0)

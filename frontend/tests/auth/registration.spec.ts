@@ -1,4 +1,4 @@
-import { test } from './auth.setup';
+import { test, expect } from './auth.setup';
 
 test.describe('Registration Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,7 +31,7 @@ test.describe('Registration Flow', () => {
     await authUtils.waitForSuccessfulAuth();
 
     await expect(authUtils.logoutButton).toBeVisible();
-    await expect(authUtils.page.locator(new RegExp(`Welcome, ${userData.email}`))).toBeVisible();
+    await expect(authUtils.page.getByText(new RegExp(`Welcome, ${userData.email}`))).toBeVisible();
   });
 
   test('registration with loading state', async ({ authUtils }) => {
