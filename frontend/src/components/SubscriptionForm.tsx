@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AutocompleteInput } from "@/components/ui/autocomplete-input"
 import { popularServices, searchServices, getServiceByName } from "@/data/popularServices"
+import countryToCurrency from "country-to-currency"
 
 const subscriptionSchema = z.object({
   service: z.string().min(1, "Service name is required"),
@@ -87,26 +88,81 @@ export function SubscriptionForm({
   title,
 }: SubscriptionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const defaultValues = useMemo((): SubscriptionFormData => ({
-    service: "",
-    description: "",
-    category: "",
-    cost: {
-      amount: 0,
-      currency: "USD",
-    },
-    billingCycle: {
-      value: 1,
-      unit: "month",
-    },
-    nextRenewal: "",
-    status: "active",
-    metadata: {
-      color: "#000000",
-      url: "",
-      notes: "",
-    },
-  }), [])
+  const defaultValues = useMemo((): SubscriptionFormData => {
+    // Detect user's currency based on their locale
+    const getUserCurrency = () => {
+      try {
+        // Get locale with multiple fallbacks
+        const locale = navigator.language || navigator.languages?.[0] || 'en-US'
+
+        // Handle different locale formats: 'en-US', 'en_US', 'en'
+        const normalizedLocale = locale.replace('_', '-')
+        const parts = normalizedLocale.split('-')
+
+        // Extract country code (second part for most locales)
+        let countryCode = parts[1]?.toUpperCase()
+
+        // Handle special cases where country code might be in different position
+        if (!countryCode && parts.length > 2) {
+          countryCode = parts[2]?.toUpperCase()
+        }
+
+        // Try direct country code lookup
+        if (countryCode && countryToCurrency[countryCode]) {
+          return countryToCurrency[countryCode]
+        }
+
+        // Fallback: try to infer from language-only locales
+        const languageCode = parts[0]?.toLowerCase()
+        const languageToCurrency = {
+          'en': 'USD', // English defaults to USD
+          'es': 'EUR', // Spanish defaults to EUR (most Spanish speakers in EU)
+          'fr': 'EUR', // French defaults to EUR
+          'de': 'EUR', // German defaults to EUR
+          'it': 'EUR', // Italian defaults to EUR
+          'pt': 'EUR', // Portuguese defaults to EUR
+          'zh': 'CNY', // Chinese defaults to CNY
+          'ja': 'JPY', // Japanese defaults to JPY
+          'ko': 'KRW', // Korean defaults to KRW
+          'ru': 'RUB', // Russian defaults to RUB
+        }
+
+        if (languageCode && languageToCurrency[languageCode]) {
+          return languageToCurrency[languageCode]
+        }
+
+        // Final fallback to USD
+        return 'USD'
+      } catch (error) {
+        // Log error in development for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to detect user currency:', error)
+        }
+        return 'USD'
+      }
+    }
+
+    return {
+      service: "",
+      description: "",
+      category: "",
+      cost: {
+        amount: 0,
+        currency: getUserCurrency(),
+      },
+      billingCycle: {
+        value: 1,
+        unit: "month",
+      },
+      nextRenewal: new Date().toISOString().split('T')[0], // Default to today's date
+      status: "active",
+      metadata: {
+        color: "#000000",
+        url: "",
+        notes: "",
+      },
+    }
+  }, [])
 
   const form = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
@@ -292,53 +348,73 @@ export function SubscriptionForm({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="billingCycle.value"
-                render={({ field }) => (
+            <FormField
+              control={form.control}
+              name="billingCycle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billing Cycle *</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => {
+                        if (value === "monthly") {
+                          field.onChange({ value: 1, unit: "month" })
+                        } else if (value === "annually") {
+                          field.onChange({ value: 1, unit: "year" })
+                        } else if (value === "custom") {
+                          field.onChange({ value: 7, unit: "day" })
+                        }
+                      }}
+                      value={
+                        field.value?.value === 1 && field.value?.unit === "month" ? "monthly" :
+                        field.value?.value === 1 && field.value?.unit === "year" ? "annually" :
+                        field.value?.unit === "day" ? "custom" : "monthly"
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select billing cycle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="annually">Annually</SelectItem>
+                        <SelectItem value="custom">Every N days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Show custom days input when "Every N days" is selected */}
+            <FormField
+              control={form.control}
+              name="billingCycle"
+              render={({ field }) => (
+                field.value?.unit === "day" ? (
                   <FormItem>
-                    <FormLabel>Billing Cycle Value *</FormLabel>
+                    <FormLabel>Number of Days *</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="1"
-                        {...field}
-                        value={field.value?.toString() || ""}
+                        placeholder="7"
+                        min="1"
+                        max="365"
+                        value={field.value?.value?.toString() || ""}
                         onChange={(e) => {
-                          const value = e.target.value === "" ? 1 : parseInt(e.target.value)
-                          field.onChange(isNaN(value) ? 1 : value)
+                          const days = e.target.value === "" ? 7 : parseInt(e.target.value)
+                          field.onChange({
+                            value: isNaN(days) || days < 1 ? 7 : Math.min(days, 365),
+                            unit: "day"
+                          })
                         }}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="billingCycle.unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Billing Unit *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select unit" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="day">Day(s)</SelectItem>
-                        <SelectItem value="month">Month(s)</SelectItem>
-                        <SelectItem value="year">Year(s)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                ) : null
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
