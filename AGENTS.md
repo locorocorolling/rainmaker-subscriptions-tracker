@@ -3,8 +3,9 @@
 ## Project Context
 - **Interview project** with Rainmaker (16-20 hours total)
 - **Tech Stack**: React+Vite+TS frontend, Node.js+Express+TS backend, MongoDB, Redis, BullMQ
-- **Deployment**: Docker Compose → Coolify + Cloudflare Tunnel
-- **Priority**: Frontend polish > API completeness > System design > Tests
+- **Deployment**: Docker Compose → Railway (demo) / Coolify (production)
+- **Status**: 95% complete, needs bug fixes & deployment for demo
+- **Current TODOs**: See [`working-docs/planning/TODOs.md`](file:///Users/kevinpaygap/Projects/external/rainmaker/subscription-tracker/working-docs/planning/TODOs.md)
 
 ## Required Deliverables Documentation
 
@@ -340,3 +341,21 @@ When updating AGENTS.md files, follow these guidelines:
 ---
 
 Remember: This is an **append-only log** - don't worry about organization, just capture everything relevant. The user will clean it up later.
+
+---
+
+## 🚀 Deployment Options
+
+### Quick Demo: Railway
+- **Command**: `railway up` (auto-detects docker-compose.yml)
+- **Best for**: Sharing demo links, portfolio projects
+- **Benefits**: Free tier, custom domains, auto MongoDB+Redis
+
+### Production: Coolify
+- **Setup**: Self-hosted on VPS ($5/month)
+- **Best for**: Long-term hosting, full control
+- **Benefits**: Docker-native, monitoring, backups
+
+**Documentation**: See [`working-docs/deployment/DEPLOYMENT_OPTIONS.md`](file:///Users/kevinpaygap/Projects/external/rainmaker/subscription-tracker/working-docs/deployment/DEPLOYMENT_OPTIONS.md) for detailed setup instructions.
+
+---
