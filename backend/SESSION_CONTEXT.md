@@ -57,9 +57,14 @@ GET  /api-docs.json          # OpenAPI JSON spec (non-production)
 - Email alerts for upcoming renewals (Project Brief §Functional Requirements 4)
 - Configurable reminder periods (Project Brief §Functional Requirements 4b)
 
+**Tech Choices (Time-Optimized)**:
+- **Job Scheduler**: node-cron (simple daily scheduler, 30min setup vs 2+ hours for BullMQ)
+- **Email Service**: Resend (excellent DX, 3000 emails/month free, simple API)
+- **Alternative**: nodemailer + Gmail App Password (if avoiding paid services)
+
 **Implementation Needed**:
-- Install node-cron or agenda.js for job scheduling
-- Add nodemailer for email delivery
+- Install node-cron for daily renewal checks
+- Add Resend for email delivery
 - Extend User model with notification preferences
 - Create daily job to check subscriptions due for renewal
 - Implement email template system for renewal alerts
