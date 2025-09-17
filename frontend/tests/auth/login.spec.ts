@@ -1,4 +1,4 @@
-import { test } from './auth.setup';
+import { test, expect } from './auth.setup';
 
 test.describe('Login Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Login Flow', () => {
     };
 
     await authUtils.openAuthModal();
-    await authUtils.switchToLogin();
+    // Modal starts in login mode by default
 
     await authUtils.emailInput.fill(credentials.email);
     await authUtils.passwordInput.fill(credentials.password);

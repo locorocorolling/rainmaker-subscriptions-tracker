@@ -16,17 +16,20 @@ export class AuthUtils {
 
   constructor(page: Page) {
     this.page = page;
-    this.signInButton = page.locator('button', { hasText: 'Sign In' });
+    // Use more specific selector for the main sign-in button (not in header, but in the top right)
+    this.signInButton = page.getByRole('button', { name: 'Sign In' }).first();
     this.authModal = page.locator('[role="dialog"]');
     this.emailInput = page.locator('input[type="email"]');
     this.passwordInput = page.locator('input#password');
-    this.submitButton = page.locator('button[type="submit"]');
-    this.registerTab = page.locator('button', { hasText: 'Sign up' });
-    this.loginTab = page.locator('button', { hasText: 'Sign in' });
+    // More specific submit button within the modal
+    this.submitButton = page.locator('[role="dialog"] button[type="submit"]');
+    // More specific tab selectors within the modal - using case insensitive partial matching
+    this.registerTab = page.locator('button:has-text("sign up")').first();
+    this.loginTab = page.locator('button:has-text("sign in")').last();
     this.nameInput = page.locator('input#name');
     this.confirmPasswordInput = page.locator('input#confirmPassword');
     this.welcomeMessage = page.locator('text=Welcome to Subscription Tracker');
-    this.logoutButton = page.locator('button', { hasText: 'Logout' });
+    this.logoutButton = page.getByRole('button', { name: 'Logout' });
   }
 
   async navigateToHome() {
@@ -70,7 +73,8 @@ export class AuthUtils {
     email: string;
     password: string;
   }) {
-    await this.switchToLogin();
+    // The modal starts in login mode by default, so no need to switch
+    // await this.switchToLogin();
 
     await this.emailInput.fill(credentials.email);
     await this.passwordInput.fill(credentials.password);

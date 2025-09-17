@@ -25,7 +25,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
         return;
       }
 
-      req.user = user;
+      req.user = { ...user.toObject(), userId: user._id.toString() };
       next();
     });
   } catch (error) {
@@ -48,7 +48,7 @@ export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction
 
     user.then((user) => {
       if (user) {
-        req.user = user;
+        req.user = { ...user.toObject(), userId: user._id.toString() };
       }
 
       next();
