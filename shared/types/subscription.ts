@@ -31,7 +31,7 @@ export interface Subscription {
   // Service details
   service: string;
   description?: string;
-  category: string;
+  category?: string;
   
   // Billing information
   cost: Money;
@@ -64,7 +64,7 @@ export interface Subscription {
 export interface CreateSubscriptionInput {
   service: string;
   description?: string;
-  category: string;
+  category?: string;
   cost: Money;
   billingCycle: BillingCycle;
   firstBillingDate: Date;

@@ -122,7 +122,7 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
   },
   category: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     maxlength: 50
   },

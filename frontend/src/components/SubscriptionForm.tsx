@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { AutocompleteInput } from "@/components/ui/autocomplete-input"
 import { popularServices, searchServices, getServiceByName } from "@/data/popularServices"
 import countryToCurrency from "country-to-currency"
@@ -37,7 +38,7 @@ import countryToCurrency from "country-to-currency"
 const subscriptionSchema = z.object({
   service: z.string().min(1, "Service name is required"),
   description: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
+  category: z.string().optional(),
   cost: z.object({
     amount: z.number().min(0.01, "Cost must be greater than 0"),
     currency: z.string().min(1, "Currency is required"),
@@ -150,6 +151,7 @@ export function SubscriptionForm({
   title,
 }: SubscriptionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [showOptionalFields, setShowOptionalFields] = useState(false)
   const defaultValues = useMemo((): SubscriptionFormData => {
     // Detect user's currency based on timezone (primary) and locale (fallback)
     const getUserCurrency = () => {
@@ -157,7 +159,7 @@ export function SubscriptionForm({
         // Primary: Timezone-based detection (most accurate)
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-        const timezoneToCurrency = {
+        const timezoneToCurrency: Record<string, string> = {
           // Southeast Asia
           'Asia/Kuala_Lumpur': 'MYR',
           'Asia/Singapore': 'SGD',
@@ -221,8 +223,8 @@ export function SubscriptionForm({
         const locale = navigator.language || navigator.languages?.[0] || 'en-US'
         const countryCode = locale.split('-')[1]?.toUpperCase()
 
-        if (countryCode && countryToCurrency[countryCode]) {
-          return countryToCurrency[countryCode]
+        if (countryCode && countryCode in countryToCurrency) {
+          return countryToCurrency[countryCode as keyof typeof countryToCurrency]
         }
 
         // Final fallback to USD
@@ -245,12 +247,7 @@ export function SubscriptionForm({
         unit: "month",
       },
       nextRenewal: new Date().toISOString().split('T')[0], // Default to today's date
-      status: "active",
-      metadata: {
-        color: "#000000",
-        url: "",
-        notes: "",
-      },
+      status: "active" as const,
     }
   }, [])
 
@@ -276,11 +273,6 @@ export function SubscriptionForm({
         },
         nextRenewal: initialData.nextRenewal || "",
         status: initialData.status || "active",
-        metadata: {
-          color: initialData.metadata?.color || "",
-          url: initialData.metadata?.url || "",
-          notes: initialData.metadata?.notes || "",
-        },
       }
       form.reset(resetValues)
     } else if (open) {
@@ -313,14 +305,15 @@ export function SubscriptionForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            {/* Essential Fields Section */}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="service"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Name *</FormLabel>
+                    <FormLabel className="text-base font-medium">Service Name<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
                       <AutocompleteInput
                         options={popularServices.map(service => ({
@@ -347,172 +340,132 @@ export function SubscriptionForm({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="cost.amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">Cost Amount<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="9.99"
+                          {...field}
+                          value={field.value?.toString() || ""}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? 0 : parseFloat(e.target.value)
+                            field.onChange(isNaN(value) ? 0 : value)
+                          }}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Brief description of the service" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="cost.currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">Currency<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currencies.map((currency) => (
+                            <SelectItem key={currency} value={currency}>
+                              {currency}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="cost.amount"
+                name="billingCycle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cost Amount *</FormLabel>
+                    <FormLabel className="text-base font-medium">Billing Cycle<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="9.99"
-                        {...field}
-                        value={field.value?.toString() || ""}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? 0 : parseFloat(e.target.value)
-                          field.onChange(isNaN(value) ? 0 : value)
+                      <Select
+                        onValueChange={(value) => {
+                          if (value === "monthly") {
+                            field.onChange({ value: 1, unit: "month" })
+                          } else if (value === "annually") {
+                            field.onChange({ value: 1, unit: "year" })
+                          } else if (value === "custom") {
+                            field.onChange({ value: 7, unit: "day" })
+                          }
                         }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cost.currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Currency *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select currency" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {currencies.map((currency) => (
-                          <SelectItem key={currency} value={currency}>
-                            {currency}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="billingCycle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Billing Cycle *</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        if (value === "monthly") {
-                          field.onChange({ value: 1, unit: "month" })
-                        } else if (value === "annually") {
-                          field.onChange({ value: 1, unit: "year" })
-                        } else if (value === "custom") {
-                          field.onChange({ value: 7, unit: "day" })
+                        value={
+                          field.value?.value === 1 && field.value?.unit === "month" ? "monthly" :
+                          field.value?.value === 1 && field.value?.unit === "year" ? "annually" :
+                          field.value?.unit === "day" ? "custom" : "monthly"
                         }
-                      }}
-                      value={
-                        field.value?.value === 1 && field.value?.unit === "month" ? "monthly" :
-                        field.value?.value === 1 && field.value?.unit === "year" ? "annually" :
-                        field.value?.unit === "day" ? "custom" : "monthly"
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select billing cycle" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="annually">Annually</SelectItem>
-                        <SelectItem value="custom">Every N days</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Show custom days input when "Every N days" is selected */}
-            <FormField
-              control={form.control}
-              name="billingCycle"
-              render={({ field }) => (
-                field.value?.unit === "day" ? (
-                  <FormItem>
-                    <FormLabel>Number of Days *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="7"
-                        min="1"
-                        max="365"
-                        value={field.value?.value?.toString() || ""}
-                        onChange={(e) => {
-                          const days = e.target.value === "" ? 7 : parseInt(e.target.value)
-                          field.onChange({
-                            value: isNaN(days) || days < 1 ? 7 : Math.min(days, 365),
-                            unit: "day"
-                          })
-                        }}
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select billing cycle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="annually">Annually</SelectItem>
+                          <SelectItem value="custom">Every N days</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                ) : null
-              )}
-            />
+                )}
+              />
 
-            <div className="grid grid-cols-2 gap-4">
+              {/* Show custom days input when "Every N days" is selected */}
+              <FormField
+                control={form.control}
+                name="billingCycle"
+                render={({ field }) => (
+                  field.value?.unit === "day" ? (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">Number of Days<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="7"
+                          min="1"
+                          max="365"
+                          value={field.value?.value?.toString() || ""}
+                          onChange={(e) => {
+                            const days = e.target.value === "" ? 7 : parseInt(e.target.value)
+                            field.onChange({
+                              value: isNaN(days) || days < 1 ? 7 : Math.min(days, 365),
+                              unit: "day"
+                            })
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  ) : <></>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="nextRenewal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Next Renewal Date *</FormLabel>
+                    <FormLabel className="text-base font-medium">Next Renewal Date<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -520,87 +473,103 @@ export function SubscriptionForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">
-                          <Badge variant="default">Active</Badge>
-                        </SelectItem>
-                        <SelectItem value="paused">
-                          <Badge variant="secondary">Paused</Badge>
-                        </SelectItem>
-                        <SelectItem value="cancelled">
-                          <Badge variant="destructive">Cancelled</Badge>
-                        </SelectItem>
-                        <SelectItem value="expired">
-                          <Badge variant="outline">Expired</Badge>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="metadata.color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Brand Color</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="color"
-                        {...field}
-                        value={field.value || "#000000"}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+            {/* Optional Fields Section */}
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setShowOptionalFields(!showOptionalFields)}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-b border-gray-200 dark:border-gray-700 pb-2 w-full cursor-pointer"
+              >
+                <span>Additional</span>
+                {showOptionalFields ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
                 )}
-              />
+              </button>
 
-              <FormField
-                control={form.control}
-                name="metadata.url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://service.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+              {showOptionalFields && (
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-normal text-muted-foreground">Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="text-sm">
+                              <SelectValue placeholder="Auto-detected from service" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="metadata.notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Additional notes about this subscription" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-normal text-muted-foreground">Description</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Brief description of the service"
+                            className="text-sm"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-normal text-muted-foreground">Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="text-sm">
+                              <SelectValue placeholder="Defaults to Active" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="active">
+                              <Badge variant="default">Active</Badge>
+                            </SelectItem>
+                            <SelectItem value="paused">
+                              <Badge variant="secondary">Paused</Badge>
+                            </SelectItem>
+                            <SelectItem value="cancelled">
+                              <Badge variant="destructive">Cancelled</Badge>
+                            </SelectItem>
+                            <SelectItem value="expired">
+                              <Badge variant="outline">Expired</Badge>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
-            />
+            </div>
+
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
