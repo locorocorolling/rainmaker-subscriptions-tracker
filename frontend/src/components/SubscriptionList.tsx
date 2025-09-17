@@ -84,7 +84,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         const response = await api.getSubscriptions();
 
         // Transform API response to match frontend interface
-        const transformedSubscriptions = response.data.map((sub: any) => ({
+        const transformedSubscriptions = response.subscriptions.map((sub: any) => ({
           id: sub.id,
           service: sub.service,
           description: sub.description,

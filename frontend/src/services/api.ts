@@ -47,7 +47,7 @@ interface SubscriptionResponse {
 }
 
 interface SubscriptionListResponse {
-  data: SubscriptionResponse[]
+  subscriptions: SubscriptionResponse[]
   pagination: {
     page: number
     limit: number
