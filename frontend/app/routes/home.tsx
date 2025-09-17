@@ -6,6 +6,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { SpendSummaryCard } from "@/components/SpendSummaryCard";
 import { UpcomingRenewalsTable } from "@/components/UpcomingRenewalsTable";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
+import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
 import { useSubscriptionData } from "@/hooks/useSubscriptionData";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
@@ -61,43 +62,53 @@ export default function Home() {
       </div>
 
       {user ? (
-        <div className="space-y-6">
-          {/* Top Section: Spend Card (left) + Add Button (right) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Consolidated Spend Card - 1/3 width on md+ */}
-            <SpendSummaryCard
-              monthlyTotal={stats.monthlyTotal}
-              upcomingTotal={stats.upcomingTotal}
+        stats.activeCount === 0 && !isLoading ? (
+          /* Empty State: Only Getting Started */
+          <div className="max-w-4xl mx-auto">
+            <GettingStartedSuggestions onAddSubscription={() => setIsAddDialogOpen(true)} />
+          </div>
+        ) : (
+          /* Regular Dashboard */
+          <div className="space-y-6">
+            {/* Top Section: Spend Card (left) + Add Button (right) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Consolidated Spend Card - 1/3 width on md+ */}
+              <SpendSummaryCard
+                monthlyTotal={stats.monthlyTotal}
+                upcomingTotal={stats.upcomingTotal}
+                isLoading={isLoading}
+              />
+
+              {/* Add Subscription Button - remaining space */}
+              <div className="md:col-span-2 flex items-center justify-center md:justify-start">
+                <Button
+                  size="lg"
+                  onClick={() => setIsAddDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Add Subscription
+                </Button>
+              </div>
+            </div>
+
+            {/* Upcoming Renewals Table */}
+            <UpcomingRenewalsTable
+              upcomingSubscriptions={stats.upcomingSubscriptions}
+              activeSubscriptionsCount={stats.activeCount}
               isLoading={isLoading}
+              onAddSubscription={() => setIsAddDialogOpen(true)}
             />
 
-            {/* Add Subscription Button - remaining space */}
-            <div className="md:col-span-2 flex items-center justify-center md:justify-start">
-              <Button
-                size="lg"
-                onClick={() => setIsAddDialogOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-5 w-5" />
-                Add Subscription
-              </Button>
-            </div>
+            {error && (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-red-500">Error loading subscriptions: {error.message}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
-
-          {/* Upcoming Renewals Table */}
-          <UpcomingRenewalsTable
-            upcomingSubscriptions={stats.upcomingSubscriptions}
-            isLoading={isLoading}
-          />
-
-          {error && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-red-500">Error loading subscriptions: {error.message}</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        )
       ) : (
         <Card>
           <CardContent className="text-center py-12">

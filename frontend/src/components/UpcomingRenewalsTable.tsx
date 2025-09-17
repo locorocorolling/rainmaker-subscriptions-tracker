@@ -12,14 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router";
+import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
 import type { Subscription } from "../../../shared/types/subscription";
 
 interface UpcomingRenewalsTableProps {
   upcomingSubscriptions: Subscription[];
+  activeSubscriptionsCount: number;
   isLoading?: boolean;
+  onAddSubscription?: () => void;
 }
 
-export function UpcomingRenewalsTable({ upcomingSubscriptions, isLoading }: UpcomingRenewalsTableProps) {
+export function UpcomingRenewalsTable({
+  upcomingSubscriptions,
+  activeSubscriptionsCount,
+  isLoading,
+  onAddSubscription
+}: UpcomingRenewalsTableProps) {
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -58,7 +66,9 @@ export function UpcomingRenewalsTable({ upcomingSubscriptions, isLoading }: Upco
         </Button>
       </CardHeader>
       <CardContent>
-        {upcomingSubscriptions.length === 0 ? (
+        {activeSubscriptionsCount === 0 ? (
+          <GettingStartedSuggestions onAddSubscription={onAddSubscription || (() => {})} />
+        ) : upcomingSubscriptions.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-sm text-muted-foreground">
               No renewals in the next 30 days
