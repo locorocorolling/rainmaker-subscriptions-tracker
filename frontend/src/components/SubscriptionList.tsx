@@ -641,7 +641,10 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           service: editingSubscription.service,
           description: editingSubscription.description,
           category: editingSubscription.category,
-          cost: editingSubscription.cost,
+          cost: {
+            amount: editingSubscription.cost.amount / 100, // Convert cents to dollars for editing
+            currency: editingSubscription.cost.currency
+          },
           billingCycle: editingSubscription.billingCycle,
           nextRenewal: editingSubscription.nextRenewal.toISOString().split('T')[0],
           status: editingSubscription.status,
