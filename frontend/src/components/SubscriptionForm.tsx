@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { AutocompleteInput } from "@/components/ui/autocomplete-input"
+import { popularServices, searchServices, getServiceByName } from "@/data/popularServices"
 
 const subscriptionSchema = z.object({
   service: z.string().min(1, "Service name is required"),
@@ -138,7 +140,7 @@ export function SubscriptionForm({
     } else if (open) {
       form.reset(defaultValues)
     }
-  }, [open, initialData])
+  }, [open, initialData, defaultValues, form])
 
   const handleSubmit = async (data: SubscriptionFormData) => {
     try {
@@ -174,7 +176,25 @@ export function SubscriptionForm({
                   <FormItem>
                     <FormLabel>Service Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Netflix, Spotify, etc." {...field} />
+                      <AutocompleteInput
+                        options={popularServices.map(service => ({
+                          value: service.name,
+                          label: service.name,
+                          color: service.color,
+                          description: service.category,
+                          metadata: { category: service.category }
+                        }))}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onSelectOption={(option) => {
+                          // Auto-set the category when a suggested service is selected
+                          if (option.metadata?.category) {
+                            form.setValue('category', option.metadata.category)
+                          }
+                        }}
+                        placeholder="Netflix, Spotify, Custom Service..."
+                        maxSuggestions={6}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,7 +207,7 @@ export function SubscriptionForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
@@ -234,7 +254,11 @@ export function SubscriptionForm({
                         step="0.01"
                         placeholder="9.99"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value?.toString() || ""}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? 0 : parseFloat(e.target.value)
+                          field.onChange(isNaN(value) ? 0 : value)
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -248,7 +272,7 @@ export function SubscriptionForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select currency" />
@@ -280,7 +304,11 @@ export function SubscriptionForm({
                         type="number"
                         placeholder="1"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        value={field.value?.toString() || ""}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? 1 : parseInt(e.target.value)
+                          field.onChange(isNaN(value) ? 1 : value)
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -294,7 +322,7 @@ export function SubscriptionForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Billing Unit *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select unit" />
@@ -333,7 +361,7 @@ export function SubscriptionForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -372,7 +400,6 @@ export function SubscriptionForm({
                         type="color"
                         {...field}
                         value={field.value || "#000000"}
-                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
