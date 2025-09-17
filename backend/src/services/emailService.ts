@@ -185,7 +185,7 @@ export class EmailService {
 
     try {
       // Send a test email to verify API key is valid
-      const result = await resend.emails.send({
+      const result = await resend!.emails.send({
         from: 'noreply@subscription-tracker.app',
         to: 'test@example.com',
         subject: 'Test Email',

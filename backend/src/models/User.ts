@@ -143,21 +143,7 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
   }
 };
 
-// Static methods
-UserSchema.statics.findByEmail = function(email: string): Promise<IUserDocument | null> {
-  return this.findOne({ email: email.toLowerCase() }).select('+password').exec();
-};
-
-UserSchema.statics.findActiveById = function(id: string): Promise<IUserDocument | null> {
-  return this.findOne({ _id: id, isActive: true }).exec();
-};
-
-UserSchema.statics.updateLastLogin = function(id: string): Promise<IUserDocument | null> {
-  return this.findByIdAndUpdate(
-    id,
-    { lastLogin: new Date() },
-    { new: true }
-  ).exec();
-};
+// Note: Business logic methods moved to UserService
+// Keeping only basic database operations in the model
 
 export const UserModel = model<IUserDocument>('User', UserSchema);
