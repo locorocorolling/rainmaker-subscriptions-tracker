@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 interface DeleteConfirmationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   subscription?: {
     service: string
     status: string
@@ -28,9 +29,19 @@ export function DeleteConfirmationDialog({
   onConfirm,
   subscription,
 }: DeleteConfirmationDialogProps) {
-  const handleDelete = () => {
-    onConfirm()
-    onOpenChange(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleDelete = async () => {
+    try {
+      setIsLoading(true)
+      await onConfirm()
+      onOpenChange(false)
+    } catch (error) {
+      // Error is handled by the parent component
+      console.error('Delete error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!open) {
@@ -85,8 +96,8 @@ export function DeleteConfirmationDialog({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" variant="destructive" onClick={handleDelete}>
-            Delete Subscription
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={isLoading}>
+            {isLoading ? "Deleting..." : "Delete Subscription"}
           </Button>
         </DialogFooter>
       </DialogContent>

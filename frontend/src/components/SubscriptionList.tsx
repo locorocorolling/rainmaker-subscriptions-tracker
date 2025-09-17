@@ -16,6 +16,8 @@ import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from 
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/services/api";
 import {
   createColumnHelper,
   flexRender,
@@ -51,91 +53,69 @@ interface SubscriptionListProps {
 
 const columnHelper = createColumnHelper<Subscription>();
 
-// Mock data for development (moved outside component to prevent recreation)
-const mockSubscriptions: Subscription[] = [
-  {
-    id: "1",
-    service: "Netflix",
-    description: "Premium streaming service",
-    category: "Entertainment",
-    cost: { amount: 1599, currency: "USD" },
-    billingCycle: { value: 1, unit: "month" },
-    nextRenewal: new Date("2024-12-15"),
-    status: "active",
-    metadata: {
-      color: "#E50914",
-      url: "https://netflix.com",
-      notes: "Family plan"
-    }
-  },
-  {
-    id: "2",
-    service: "Spotify",
-    description: "Music streaming service",
-    category: "Music",
-    cost: { amount: 999, currency: "USD" },
-    billingCycle: { value: 1, unit: "month" },
-    nextRenewal: new Date("2024-12-01"),
-    status: "active",
-    metadata: {
-      color: "#1DB954",
-      url: "https://spotify.com",
-      notes: "Premium individual"
-    }
-  },
-  {
-    id: "3",
-    service: "GitHub Pro",
-    description: "Developer tools and repositories",
-    category: "Development",
-    cost: { amount: 400, currency: "USD" },
-    billingCycle: { value: 1, unit: "month" },
-    nextRenewal: new Date("2024-12-31"),
-    status: "active",
-    metadata: {
-      color: "#24292e",
-      url: "https://github.com",
-      notes: "Pro account for private repos"
-    }
-  },
-  {
-    id: "4",
-    service: "Adobe Creative Cloud",
-    description: "Design and creative software suite",
-    category: "Design",
-    cost: { amount: 5299, currency: "USD" },
-    billingCycle: { value: 1, unit: "year" },
-    nextRenewal: new Date("2025-01-15"),
-    status: "active",
-    metadata: {
-      color: "#FF0000",
-      url: "https://adobe.com",
-      notes: "All apps plan"
-    }
-  }
-];
 
-export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) {
+export function SubscriptionList({ subscriptions: propSubscriptions }: SubscriptionListProps) {
+  const { user, token } = useAuth();
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('all');
 
   // CRUD state
   const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null);
 
-  // Initialize with mock data if no subscriptions provided
+  // Fetch subscriptions from API
   useEffect(() => {
-    if (subscriptions && subscriptions.length > 0) {
-      setAllSubscriptions(subscriptions);
-    } else {
-      setAllSubscriptions(mockSubscriptions);
-    }
-  }, [subscriptions]);
+    const fetchSubscriptions = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await api.getSubscriptions();
+
+        // Transform API response to match frontend interface
+        const transformedSubscriptions = response.data.map((sub: any) => ({
+          id: sub.id,
+          service: sub.service,
+          description: sub.description,
+          category: sub.category,
+          cost: {
+            amount: sub.cost.amount, // Backend stores in cents
+            currency: sub.cost.currency
+          },
+          billingCycle: {
+            value: sub.billingCycle.value,
+            unit: sub.billingCycle.unit
+          },
+          nextRenewal: new Date(sub.nextRenewal),
+          status: sub.status,
+          metadata: {
+            color: sub.metadata?.color,
+            url: sub.metadata?.url,
+            notes: sub.metadata?.notes
+          }
+        }));
+
+        setAllSubscriptions(transformedSubscriptions);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch subscriptions');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubscriptions();
+  }, [token]);
 
   const displaySubscriptions = allSubscriptions;
 
@@ -146,73 +126,144 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
     );
   }, [displaySubscriptions, filterStatus]);
 
-  // Calculate totals
+  // Calculate totals (convert from cents to dollars)
   const monthlyTotal = useMemo(() => {
     return filteredSubscriptions
       .filter(sub => sub.status === 'active')
       .reduce((total, sub) => {
         const monthlyAmount = sub.billingCycle.unit === 'year'
-          ? sub.cost.amount / 12
+          ? sub.cost.amount / 12 / 100 // Convert cents to dollars
           : sub.billingCycle.unit === 'day'
-          ? sub.cost.amount * 30
-          : sub.cost.amount;
+          ? sub.cost.amount * 30 / 100
+          : sub.cost.amount / 100; // Convert cents to dollars
         return total + monthlyAmount;
       }, 0);
   }, [filteredSubscriptions]);
 
   // CRUD Handler Functions
-  const handleAddSubscription = (data: any) => {
-    const newSubscription: Subscription = {
-      id: Date.now().toString(),
-      service: data.service,
-      description: data.description,
-      category: data.category,
-      cost: data.cost,
-      billingCycle: data.billingCycle,
-      nextRenewal: new Date(data.nextRenewal),
-      status: data.status,
-      metadata: {
-        color: data.metadata.color || undefined,
-        url: data.metadata.url || undefined,
-        notes: data.metadata.notes || undefined,
-      },
-    };
-    setAllSubscriptions(prev => [...prev, newSubscription]);
+  const handleAddSubscription = async (data: any) => {
+    try {
+      // Transform frontend data to backend format
+      const apiData = {
+        service: data.service,
+        description: data.description,
+        category: data.category,
+        cost: {
+          amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
+          currency: data.cost.currency
+        },
+        billingCycle: data.billingCycle,
+        firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
+        status: data.status,
+        metadata: {
+          ...(data.metadata.color && { color: data.metadata.color }),
+          ...(data.metadata.url && { url: data.metadata.url }),
+          ...(data.metadata.notes && { notes: data.metadata.notes })
+        }
+      };
+
+      const response = await api.createSubscription(apiData);
+
+      // Transform response back to frontend format
+      const newSubscription: Subscription = {
+        id: response.data.id,
+        service: response.data.service,
+        description: response.data.description,
+        category: response.data.category,
+        cost: {
+          amount: response.data.cost.amount, // Keep in cents for display
+          currency: response.data.cost.currency
+        },
+        billingCycle: {
+          value: response.data.billingCycle.value,
+          unit: response.data.billingCycle.unit
+        },
+        nextRenewal: new Date(response.data.nextRenewal),
+        status: response.data.status,
+        metadata: {
+          color: response.data.metadata?.color,
+          url: response.data.metadata?.url,
+          notes: response.data.metadata?.notes
+        }
+      };
+
+      setAllSubscriptions(prev => [...prev, newSubscription]);
+    } catch (error) {
+      console.error('Failed to create subscription:', error);
+      throw error;
+    }
   };
 
-  const handleEditSubscription = (data: any) => {
+  const handleEditSubscription = async (data: any) => {
     if (!editingSubscription) return;
 
-    const updatedSubscription: Subscription = {
-      ...editingSubscription,
-      service: data.service,
-      description: data.description,
-      category: data.category,
-      cost: data.cost,
-      billingCycle: data.billingCycle,
-      nextRenewal: new Date(data.nextRenewal),
-      status: data.status,
-      metadata: {
-        ...editingSubscription.metadata,
-        color: data.metadata.color || undefined,
-        url: data.metadata.url || undefined,
-        notes: data.metadata.notes || undefined,
-      },
-    };
+    try {
+      // Transform frontend data to backend format
+      const apiData = {
+        service: data.service,
+        description: data.description,
+        category: data.category,
+        cost: {
+          amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
+          currency: data.cost.currency
+        },
+        billingCycle: data.billingCycle,
+        status: data.status,
+        metadata: {
+          ...(data.metadata.color && { color: data.metadata.color }),
+          ...(data.metadata.url && { url: data.metadata.url }),
+          ...(data.metadata.notes && { notes: data.metadata.notes })
+        }
+      };
 
-    setAllSubscriptions(prev =>
-      prev.map(sub => sub.id === editingSubscription.id ? updatedSubscription : sub)
-    );
-    setEditingSubscription(null);
+      const response = await api.updateSubscription(editingSubscription.id, apiData);
+
+      // Transform response back to frontend format
+      const updatedSubscription: Subscription = {
+        ...editingSubscription,
+        service: response.data.service,
+        description: response.data.description,
+        category: response.data.category,
+        cost: {
+          amount: response.data.cost.amount, // Keep in cents for display
+          currency: response.data.cost.currency
+        },
+        billingCycle: {
+          value: response.data.billingCycle.value,
+          unit: response.data.billingCycle.unit
+        },
+        nextRenewal: new Date(response.data.nextRenewal),
+        status: response.data.status,
+        metadata: {
+          color: response.data.metadata?.color,
+          url: response.data.metadata?.url,
+          notes: response.data.metadata?.notes
+        }
+      };
+
+      setAllSubscriptions(prev =>
+        prev.map(sub => sub.id === editingSubscription.id ? updatedSubscription : sub)
+      );
+      setEditingSubscription(null);
+    } catch (error) {
+      console.error('Failed to update subscription:', error);
+      throw error;
+    }
   };
 
-  const handleDeleteSubscription = () => {
+  const handleDeleteSubscription = async () => {
     if (!deletingSubscription) return;
 
-    setAllSubscriptions(prev =>
-      prev.filter(sub => sub.id !== deletingSubscription.id)
-    );
-    setDeletingSubscription(null);
+    try {
+      await api.deleteSubscription(deletingSubscription.id);
+      setAllSubscriptions(prev =>
+        prev.filter(sub => sub.id !== deletingSubscription.id)
+      );
+      setDeletingSubscription(null);
+    } catch (error) {
+      console.error('Failed to delete subscription:', error);
+      throw error;
+    }
   };
 
   const openEditDialog = (subscription: Subscription) => {
@@ -265,7 +316,7 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
         header: () => (
           <div className="text-left font-medium">Cost</div>
         ),
-        cell: (info) => formatCurrency(info.getValue().amount),
+        cell: (info) => formatCurrency(info.getValue().amount / 100), // Convert cents to dollars for display
         enableSorting: true,
         enableColumnFilter: false,
         sortingFn: (a, b) => a.original.cost.amount - b.original.cost.amount,
@@ -368,6 +419,37 @@ export function SubscriptionList({ subscriptions = [] }: SubscriptionListProps) 
   const sortedSubscriptions = useMemo(() => {
     return table.getSortedRowModel().rows.map(row => row.original);
   }, [filteredSubscriptions, sorting]);
+
+  if (!user) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Please sign in to view your subscriptions.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Loading subscriptions...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Error: {error}</p>
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          className="mt-4"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

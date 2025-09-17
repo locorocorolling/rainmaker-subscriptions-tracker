@@ -57,7 +57,7 @@ type SubscriptionFormData = z.infer<typeof subscriptionSchema>
 interface SubscriptionFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: SubscriptionFormData) => void
+  onSubmit: (data: SubscriptionFormData) => Promise<void>
   initialData?: Partial<SubscriptionFormData>
   title: string
 }
@@ -84,6 +84,7 @@ export function SubscriptionForm({
   initialData,
   title,
 }: SubscriptionFormProps) {
+  const [isLoading, setIsLoading] = useState(false)
   const defaultValues = useMemo((): SubscriptionFormData => ({
     service: "",
     description: "",
@@ -139,10 +140,18 @@ export function SubscriptionForm({
     }
   }, [open, initialData])
 
-  const handleSubmit = (data: SubscriptionFormData) => {
-    onSubmit(data)
-    form.reset()
-    onOpenChange(false)
+  const handleSubmit = async (data: SubscriptionFormData) => {
+    try {
+      setIsLoading(true)
+      await onSubmit(data)
+      form.reset()
+      onOpenChange(false)
+    } catch (error) {
+      // Error is handled by the parent component
+      console.error('Form submission error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -404,8 +413,11 @@ export function SubscriptionForm({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {title.includes("Add") ? "Add Subscription" : "Update Subscription"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading
+                  ? (title.includes("Add") ? "Adding..." : "Updating...")
+                  : (title.includes("Add") ? "Add Subscription" : "Update Subscription")
+                }
               </Button>
             </DialogFooter>
           </form>
