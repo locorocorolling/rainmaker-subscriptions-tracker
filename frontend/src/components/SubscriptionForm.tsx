@@ -78,7 +78,69 @@ const categories = [
   "Other",
 ]
 
-const currencies = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY"]
+// Comprehensive list of major global currencies
+const currencies = [
+  // Major global currencies
+  "USD", // US Dollar
+  "EUR", // Euro
+  "GBP", // British Pound
+  "JPY", // Japanese Yen
+  "CHF", // Swiss Franc
+  "CAD", // Canadian Dollar
+  "AUD", // Australian Dollar
+  "NZD", // New Zealand Dollar
+
+  // Asian currencies
+  "SGD", // Singapore Dollar
+  "MYR", // Malaysian Ringgit
+  "HKD", // Hong Kong Dollar
+  "CNY", // Chinese Yuan
+  "KRW", // South Korean Won
+  "THB", // Thai Baht
+  "IDR", // Indonesian Rupiah
+  "INR", // Indian Rupee
+  "PHP", // Philippine Peso
+  "VND", // Vietnamese Dong
+  "TWD", // Taiwan Dollar
+
+  // Middle East & Africa
+  "AED", // UAE Dirham
+  "SAR", // Saudi Riyal
+  "ZAR", // South African Rand
+  "EGP", // Egyptian Pound
+  "NGN", // Nigerian Naira
+
+  // Europe
+  "NOK", // Norwegian Krone
+  "SEK", // Swedish Krona
+  "DKK", // Danish Krone
+  "PLN", // Polish Zloty
+  "CZK", // Czech Koruna
+  "HUF", // Hungarian Forint
+  "RON", // Romanian Leu
+  "BGN", // Bulgarian Lev
+  "HRK", // Croatian Kuna
+  "RUB", // Russian Ruble
+  "UAH", // Ukrainian Hryvnia
+  "TRY", // Turkish Lira
+
+  // Americas
+  "BRL", // Brazilian Real
+  "MXN", // Mexican Peso
+  "ARS", // Argentine Peso
+  "CLP", // Chilean Peso
+  "COP", // Colombian Peso
+  "PEN", // Peruvian Sol
+  "UYU", // Uruguayan Peso
+
+  // Other major currencies
+  "ILS", // Israeli Shekel
+  "PKR", // Pakistani Rupee
+  "BDT", // Bangladeshi Taka
+  "LKR", // Sri Lankan Rupee
+  "NPR", // Nepalese Rupee
+  "IRR", // Iranian Rial
+].sort() // Sort alphabetically for better UX
 
 export function SubscriptionForm({
   open,
@@ -89,55 +151,83 @@ export function SubscriptionForm({
 }: SubscriptionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const defaultValues = useMemo((): SubscriptionFormData => {
-    // Detect user's currency based on their locale
+    // Detect user's currency based on timezone (primary) and locale (fallback)
     const getUserCurrency = () => {
       try {
-        // Get locale with multiple fallbacks
-        const locale = navigator.language || navigator.languages?.[0] || 'en-US'
+        // Primary: Timezone-based detection (most accurate)
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-        // Handle different locale formats: 'en-US', 'en_US', 'en'
-        const normalizedLocale = locale.replace('_', '-')
-        const parts = normalizedLocale.split('-')
+        const timezoneToCurrency = {
+          // Southeast Asia
+          'Asia/Kuala_Lumpur': 'MYR',
+          'Asia/Singapore': 'SGD',
+          'Asia/Bangkok': 'THB',
+          'Asia/Jakarta': 'IDR',
+          'Asia/Manila': 'PHP',
+          'Asia/Ho_Chi_Minh': 'VND',
 
-        // Extract country code (second part for most locales)
-        let countryCode = parts[1]?.toUpperCase()
+          // East Asia
+          'Asia/Tokyo': 'JPY',
+          'Asia/Seoul': 'KRW',
+          'Asia/Shanghai': 'CNY',
+          'Asia/Hong_Kong': 'HKD',
+          'Asia/Taipei': 'TWD',
 
-        // Handle special cases where country code might be in different position
-        if (!countryCode && parts.length > 2) {
-          countryCode = parts[2]?.toUpperCase()
+          // South Asia & Middle East
+          'Asia/Kolkata': 'INR',
+          'Asia/Dubai': 'AED',
+
+          // United States (all major timezones)
+          'America/New_York': 'USD',
+          'America/Chicago': 'USD',
+          'America/Denver': 'USD',
+          'America/Los_Angeles': 'USD',
+          'America/Phoenix': 'USD',
+          'America/Anchorage': 'USD',
+          'Pacific/Honolulu': 'USD',
+
+          // Canada
+          'America/Toronto': 'CAD',
+          'America/Vancouver': 'CAD',
+          'America/Montreal': 'CAD',
+
+          // Europe
+          'Europe/London': 'GBP',
+          'Europe/Paris': 'EUR',
+          'Europe/Berlin': 'EUR',
+          'Europe/Madrid': 'EUR',
+          'Europe/Rome': 'EUR',
+          'Europe/Amsterdam': 'EUR',
+          'Europe/Brussels': 'EUR',
+          'Europe/Vienna': 'EUR',
+          'Europe/Dublin': 'EUR',
+          'Europe/Zurich': 'CHF',
+          'Europe/Oslo': 'NOK',
+          'Europe/Stockholm': 'SEK',
+          'Europe/Copenhagen': 'DKK',
+
+          // Oceania
+          'Australia/Sydney': 'AUD',
+          'Australia/Melbourne': 'AUD',
+          'Australia/Perth': 'AUD',
+          'Pacific/Auckland': 'NZD',
         }
 
-        // Try direct country code lookup
+        if (timezoneToCurrency[timezone]) {
+          return timezoneToCurrency[timezone]
+        }
+
+        // Fallback: Locale-based detection for unmapped timezones
+        const locale = navigator.language || navigator.languages?.[0] || 'en-US'
+        const countryCode = locale.split('-')[1]?.toUpperCase()
+
         if (countryCode && countryToCurrency[countryCode]) {
           return countryToCurrency[countryCode]
         }
 
-        // Fallback: try to infer from language-only locales
-        const languageCode = parts[0]?.toLowerCase()
-        const languageToCurrency = {
-          'en': 'USD', // English defaults to USD
-          'es': 'EUR', // Spanish defaults to EUR (most Spanish speakers in EU)
-          'fr': 'EUR', // French defaults to EUR
-          'de': 'EUR', // German defaults to EUR
-          'it': 'EUR', // Italian defaults to EUR
-          'pt': 'EUR', // Portuguese defaults to EUR
-          'zh': 'CNY', // Chinese defaults to CNY
-          'ja': 'JPY', // Japanese defaults to JPY
-          'ko': 'KRW', // Korean defaults to KRW
-          'ru': 'RUB', // Russian defaults to RUB
-        }
-
-        if (languageCode && languageToCurrency[languageCode]) {
-          return languageToCurrency[languageCode]
-        }
-
         // Final fallback to USD
         return 'USD'
-      } catch (error) {
-        // Log error in development for debugging
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('Failed to detect user currency:', error)
-        }
+      } catch {
         return 'USD'
       }
     }
