@@ -1,2 +1,6 @@
 /TODOs.md
 misc/
+
+# Environment variables
+.env
+.env.local

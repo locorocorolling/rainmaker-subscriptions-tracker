@@ -1,15 +1,42 @@
 import { Schema, model, Document } from 'mongoose';
-import {
-  Subscription,
-  CreateSubscriptionInput,
-  UpdateSubscriptionInput,
-  SubscriptionStatus,
-  EndOfMonthStrategy
-} from '../../../shared/types/subscription';
+
+// Local interfaces to avoid circular dependency with shared types
+interface MoneyType {
+  amount: number; // Integer minor units (cents, pence, etc.)
+  currency: string; // ISO 4217 code
+}
+
+interface BillingCycleType {
+  value: number;
+  unit: 'day' | 'month' | 'year';
+}
+
+type SubscriptionStatusType = 'active' | 'paused' | 'cancelled' | 'expired';
+type EndOfMonthStrategyType = 'last_day_of_month';
 
 // Interface for Mongoose document
-export interface ISubscriptionDocument extends Omit<Subscription, 'id'>, Document {
+export interface ISubscriptionDocument extends Document {
   id: string;
+  userId: string;
+  service: string;
+  description?: string;
+  category?: string;
+  cost: MoneyType;
+  billingCycle: BillingCycleType;
+  firstBillingDate: Date;
+  nextRenewal: Date;
+  lastRenewal?: Date;
+  endOfMonthStrategy: EndOfMonthStrategyType;
+  preservedBillingDay?: number;
+  status: SubscriptionStatusType;
+  metadata?: {
+    color?: string;
+    logoUrl?: string;
+    url?: string;
+    notes?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Money type schema
@@ -17,7 +44,13 @@ const MoneySchema = new Schema({
   amount: {
     type: Number,
     required: true,
-    min: 0
+    min: 0,
+    validate: {
+      validator: function(v: number) {
+        return Number.isInteger(v);
+      },
+      message: 'Amount must be an integer (minor units - cents for USD, pence for GBP, etc.)'
+    }
   },
   currency: {
     type: String,
@@ -207,9 +240,8 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
 
 // Indexes for better performance
 SubscriptionSchema.index({ userId: 1, createdAt: -1 });
-SubscriptionSchema.index({ status: 1 });
+SubscriptionSchema.index({ status: 1, nextRenewal: 1 }); // Compound index for renewals and reminders
 SubscriptionSchema.index({ category: 1 });
-SubscriptionSchema.index({ nextRenewal: 1 });
 SubscriptionSchema.index({ userId: 1, status: 1 });
 
 // Virtual for computed fields
@@ -234,57 +266,7 @@ SubscriptionSchema.pre('save', function(next) {
   next();
 });
 
-// Static methods
-SubscriptionSchema.statics.createSubscription = function(
-  userId: string,
-  input: CreateSubscriptionInput
-): Promise<ISubscriptionDocument> {
-  const subscription = new this({
-    userId,
-    ...input,
-    nextRenewal: input.firstBillingDate // Will be calculated by business logic
-  });
-
-  return subscription.save();
-};
-
-SubscriptionSchema.statics.updateSubscription = function(
-  id: string,
-  userId: string,
-  updates: UpdateSubscriptionInput
-): Promise<ISubscriptionDocument | null> {
-  return this.findOneAndUpdate(
-    { _id: id, userId },
-    updates,
-    { new: true, runValidators: true }
-  ).exec();
-};
-
-SubscriptionSchema.statics.findByUser = function(
-  userId: string,
-  options: { status?: SubscriptionStatus; category?: string } = {}
-): Promise<ISubscriptionDocument[]> {
-  const query: any = { userId };
-
-  if (options.status) query.status = options.status;
-  if (options.category) query.category = options.category;
-
-  return this.find(query).sort({ nextRenewal: 1 }).exec();
-};
-
-SubscriptionSchema.statics.findUpcomingRenewals = function(
-  userId: string,
-  daysAhead: number = 7
-): Promise<ISubscriptionDocument[]> {
-  const startDate = new Date();
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() + daysAhead);
-
-  return this.find({
-    userId,
-    status: 'active',
-    nextRenewal: { $gte: startDate, $lte: endDate }
-  }).sort({ nextRenewal: 1 }).exec();
-};
+// Note: Business logic methods moved to SubscriptionService
+// Keeping only basic database operations in the model
 
 export const SubscriptionModel = model<ISubscriptionDocument>('Subscription', SubscriptionSchema);

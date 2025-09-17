@@ -16,7 +16,7 @@ test.describe('Login Flow', () => {
     await authUtils.waitForSuccessfulAuth();
 
     await expect(authUtils.logoutButton).toBeVisible();
-    await expect(authUtils.page.locator(new RegExp(`Welcome, ${credentials.email}`))).toBeVisible();
+    await expect(authUtils.page.getByText(new RegExp(`Welcome, ${credentials.email}`))).toBeVisible();
   });
 
   test('login with loading state', async ({ authUtils }) => {
@@ -81,7 +81,7 @@ test.describe('Login Flow', () => {
 
     await page.reload();
     await expect(authUtils.logoutButton).toBeVisible();
-    await expect(authUtils.page.locator(new RegExp(`Welcome, ${credentials.email}`))).toBeVisible();
+    await expect(authUtils.page.getByText(new RegExp(`Welcome, ${credentials.email}`))).toBeVisible();
   });
 
   test('logout functionality', async ({ authUtils }) => {
