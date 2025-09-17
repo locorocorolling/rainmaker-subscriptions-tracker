@@ -84,7 +84,7 @@ export function SubscriptionForm({
   initialData,
   title,
 }: SubscriptionFormProps) {
-  const defaultValues = useMemo(() => ({
+  const defaultValues = useMemo((): SubscriptionFormData => ({
     service: "",
     description: "",
     category: "",
