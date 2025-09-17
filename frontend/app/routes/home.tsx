@@ -7,6 +7,7 @@ import { SpendSummaryCard } from "@/components/SpendSummaryCard";
 import { UpcomingRenewalsTable } from "@/components/UpcomingRenewalsTable";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
+import { Layout } from "@/components/Layout";
 import { useSubscriptionData } from "@/hooks/useSubscriptionData";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
@@ -41,25 +42,19 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Subscription Tracker</h1>
-          <p className="text-gray-600">Track all your subscriptions in one place</p>
-        </div>
-        {user ? (
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user.name || user.email}</span>
-            <Button variant="outline" onClick={logout}>
-              Logout
-            </Button>
+    <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Subscription Tracker</h1>
+            <p className="text-gray-600">Track all your subscriptions in one place</p>
           </div>
-        ) : (
-          <Button onClick={() => setShowAuthModal(true)}>
-            Sign In
-          </Button>
-        )}
-      </div>
+          {!user && (
+            <Button onClick={() => setShowAuthModal(true)}>
+              Sign In
+            </Button>
+          )}
+        </div>
 
       {user ? (
         isLoading ? (
@@ -137,6 +132,7 @@ export default function Home() {
         onSubmit={handleAddSubscription}
         title="Add New Subscription"
       />
-    </div>
+      </div>
+    </Layout>
   );
 }
