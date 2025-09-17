@@ -133,30 +133,28 @@ export function DesktopNavigation({ onAddSubscription }: NavigationProps) {
 
       {/* User Section */}
       {user && (
-        <Card className="m-4 mt-auto border shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {user.name || "User"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-              </div>
+        <div className="mt-auto border-t p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-muted-foreground" />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logout}
-              className="w-full justify-start gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </Button>
-          </CardContent>
-        </Card>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {user.name || "User"}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
       )}
     </div>
   );
