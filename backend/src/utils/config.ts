@@ -32,6 +32,9 @@ export const config = {
   // Notifications
   NOTIFICATION_REMINDER_DAYS: parseInt(process.env.NOTIFICATION_REMINDER_DAYS || '7'),
 
+  // Email
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+
   // Validate required environment variables in production
   validateEnv: () => {
     if (process.env.NODE_ENV === 'production') {

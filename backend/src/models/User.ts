@@ -15,7 +15,6 @@ export interface IUserDocument extends Document {
     notifications: {
       email: boolean;
       renewalReminders: boolean;
-      weeklyReports: boolean;
     };
   };
   createdAt: Date;
@@ -53,10 +52,6 @@ const PreferencesSchema = new Schema({
     renewalReminders: {
       type: Boolean,
       default: true
-    },
-    weeklyReports: {
-      type: Boolean,
-      default: false
     }
   }
 }, { _id: false });

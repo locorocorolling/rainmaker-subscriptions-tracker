@@ -11,6 +11,7 @@ import { connectMongoDB, checkMongoDBHealth } from './utils/database';
 import { config } from './utils/config';
 import authRoutes from './routes/auth';
 import subscriptionRoutes from './routes/subscriptions';
+import { BackgroundJobService } from './services/backgroundJobService';
 
 // Load environment variables
 dotenv.config();
@@ -365,6 +366,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await checkMongoDBHealth();
+    const jobStatus = BackgroundJobService.getStatus();
 
     res.json({
       status: dbHealth ? 'OK' : 'ERROR',
@@ -372,7 +374,8 @@ app.get('/health', async (req, res) => {
       environment: config.NODE_ENV,
       database: {
         mongodb: dbHealth ? 'connected' : 'disconnected'
-      }
+      },
+      jobs: jobStatus
     });
   } catch (error) {
     res.status(500).json({
@@ -489,6 +492,10 @@ const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectMongoDB();
+
+    // Start background job service
+    BackgroundJobService.start();
+    logger.info('⏰ Background job service started');
 
     // Start server
     app.listen(PORT, () => {
