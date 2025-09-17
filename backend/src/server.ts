@@ -290,8 +290,9 @@ const PORT = config.PORT;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: config.CORS_ORIGIN,
-  credentials: true
+  origin: config.getCorsOrigin(),
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 
 // Rate limiting

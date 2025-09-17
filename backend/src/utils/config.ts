@@ -19,8 +19,30 @@ export const config = {
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
 
-  // CORS
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5174',
+  // CORS - supports boolean, '*', single URL, or comma-separated list
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174',
+
+  // Parse CORS origins using built-in cors library patterns
+  getCorsOrigin: () => {
+    const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174';
+
+    // Handle special cases
+    if (corsOrigin === '*' || corsOrigin === 'true') {
+      return true; // Allow all origins
+    }
+
+    if (corsOrigin === 'false') {
+      return false; // Disable CORS
+    }
+
+    // Handle comma-separated list
+    if (corsOrigin.includes(',')) {
+      return corsOrigin.split(',').map(origin => origin.trim());
+    }
+
+    // Single origin
+    return corsOrigin;
+  },
 
   // Rate limiting
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
@@ -42,7 +64,7 @@ export const config = {
         'MONGODB_URI',
         'REDIS_URL',
         'JWT_SECRET',
-        'CORS_ORIGIN'
+        // 'CORS_ORIGIN' // Made optional to allow flexibility
       ];
 
       const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
