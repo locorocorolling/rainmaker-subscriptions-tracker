@@ -8,6 +8,7 @@ import { UpcomingRenewalsTable } from "@/components/UpcomingRenewalsTable";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
 import { Layout } from "@/components/Layout";
+import { PageHeader } from "@/components/PageHeader";
 import { useSubscriptionData } from "@/hooks/useSubscriptionData";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
@@ -44,17 +45,16 @@ export default function Home() {
   return (
     <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
       <div className="container mx-auto p-6 max-w-6xl">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Subscription Tracker</h1>
-            <p className="text-gray-600">Track all your subscriptions in one place</p>
-          </div>
+        <PageHeader
+          title="Subscription Tracker"
+          subtitle="Track all your subscriptions in one place"
+        >
           {!user && (
             <Button onClick={() => setShowAuthModal(true)}>
               Sign In
             </Button>
           )}
-        </div>
+        </PageHeader>
 
       {user ? (
         isLoading ? (

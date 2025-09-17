@@ -1,6 +1,7 @@
 import type { Route } from "./+types/subscriptions";
 import { SubscriptionList } from "@/components/SubscriptionList";
 import { Layout } from "@/components/Layout";
+import { PageHeader } from "@/components/PageHeader";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
@@ -21,11 +22,11 @@ export default function Subscriptions() {
 
   return (
     <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
-      <div className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Subscriptions</h1>
-          <p className="text-gray-600">Track all your subscriptions in one place</p>
-        </div>
+      <div className="flex-1 container mx-auto p-6 max-w-6xl">
+        <PageHeader
+          title="Subscriptions"
+          subtitle="Manage and monitor all your subscriptions"
+        />
 
         <SubscriptionList />
 
