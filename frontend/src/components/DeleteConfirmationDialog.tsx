@@ -50,7 +50,7 @@ export function DeleteConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 text-foreground border-border">
         <DialogHeader>
           <DialogTitle>Delete Subscription</DialogTitle>
           <DialogDescription>

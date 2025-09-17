@@ -22,7 +22,7 @@ export function AuthModal({ open, onOpenChange, onSuccess }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 text-foreground border-border">
         <DialogHeader>
           <DialogTitle>
             {authMode === "login" ? "Welcome Back" : "Get Started"}
