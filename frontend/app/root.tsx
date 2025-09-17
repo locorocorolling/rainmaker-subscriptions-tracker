@@ -9,6 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AuthProvider } from "../src/contexts/AuthContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -34,7 +35,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-gray-50">
         <div className="min-h-screen flex flex-col">
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
           <ScrollRestoration />
           <Scripts />
         </div>

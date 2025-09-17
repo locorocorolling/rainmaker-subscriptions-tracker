@@ -9,7 +9,8 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "tsc --noEmit",
     "typecheck:full": "react-router typegen && tsc --noEmit",
-    "typecheck:routes": "react-router typegen"
+    "typecheck:routes": "react-router typegen",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -32,6 +33,7 @@
     "zod": "^4.1.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@react-router/dev": "^7.7.1",
     "@tailwindcss/vite": "^4.1.4",
     "@types/node": "^20",
