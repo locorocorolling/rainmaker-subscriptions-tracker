@@ -56,6 +56,11 @@ interface SubscriptionListResponse {
   }
 }
 
+interface UpcomingRenewalsResponse {
+  subscriptions: SubscriptionResponse[]
+  days: number
+}
+
 class ApiService {
   private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('auth_token')
@@ -91,7 +96,7 @@ class ApiService {
     search?: string
     page?: number
     limit?: number
-  }): Promise<SubscriptionListResponse> {
+  }): Promise<ApiResponse<SubscriptionListResponse>> {
     const queryParams = new URLSearchParams()
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -102,7 +107,7 @@ class ApiService {
     }
 
     const endpoint = `/subscriptions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-    return this.request<SubscriptionListResponse>(endpoint)
+    return this.request<ApiResponse<SubscriptionListResponse>>(endpoint)
   }
 
   async getSubscription(id: string): Promise<ApiResponse<SubscriptionResponse>> {
@@ -129,12 +134,12 @@ class ApiService {
     })
   }
 
-  async getSubscriptionStats() {
-    return this.request('/subscriptions/stats')
+  async getSubscriptionStats(): Promise<ApiResponse<any>> {
+    return this.request<ApiResponse<any>>('/subscriptions/stats')
   }
 
-  async getUpcomingRenewals(days: number = 7) {
-    return this.request(`/subscriptions/upcoming?days=${days}`)
+  async getUpcomingRenewals(days: number = 7): Promise<ApiResponse<UpcomingRenewalsResponse>> {
+    return this.request<ApiResponse<UpcomingRenewalsResponse>>(`/subscriptions/upcoming?days=${days}`)
   }
 
   // Auth

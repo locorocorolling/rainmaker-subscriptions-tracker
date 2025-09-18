@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { SubscriptionService } from '../services/subscription';
 import { authenticateToken } from '../middleware/auth';
+import { ApiResponse, PaginatedResponse } from '../types/api';
 import Joi from 'joi';
 
 const router: Router = Router();
@@ -124,8 +125,8 @@ router.post('/', async (req: Request, res: Response) => {
     const subscription = await SubscriptionService.createSubscription(userId, req.body);
 
     res.status(201).json({
-      message: 'Subscription created successfully',
-      subscription
+      data: subscription,
+      message: 'Subscription created successfully'
     });
   } catch (error) {
     console.error('Create subscription error:', error);
@@ -248,12 +249,14 @@ router.get('/', async (req: Request, res: Response) => {
       });
 
       return res.json({
-        subscriptions: result.subscriptions,
-        pagination: {
-          page,
-          limit,
-          total: result.total,
-          pages: Math.ceil(result.total / limit)
+        data: {
+          subscriptions: result.subscriptions,
+          pagination: {
+            page,
+            limit,
+            total: result.total,
+            pages: Math.ceil(result.total / limit)
+          }
         }
       });
     } else {
@@ -265,12 +268,14 @@ router.get('/', async (req: Request, res: Response) => {
       const paginatedSubscriptions = subscriptions.slice(offset, offset + limit);
 
       return res.json({
-        subscriptions: paginatedSubscriptions,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
+        data: {
+          subscriptions: paginatedSubscriptions,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
         }
       });
     }
@@ -322,7 +327,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     const stats = await SubscriptionService.getSubscriptionStats(userId);
 
     res.json({
-      stats
+      data: stats
     });
   } catch (error) {
     console.error('Get subscription stats error:', error);
@@ -404,8 +409,10 @@ router.get('/upcoming', async (req: Request, res: Response) => {
     const upcoming = await SubscriptionService.getUpcomingRenewals(userId, value.days);
 
     res.json({
-      upcoming,
-      days: value.days
+      data: {
+        subscriptions: upcoming,
+        days: value.days
+      }
     });
   } catch (error) {
     console.error('Get upcoming renewals error:', error);
@@ -475,7 +482,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json({
-      subscription
+      data: subscription
     });
   } catch (error) {
     console.error('Get subscription error:', error);
@@ -604,8 +611,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     res.json({
-      message: 'Subscription updated successfully',
-      subscription
+      data: subscription,
+      message: 'Subscription updated successfully'
     });
   } catch (error) {
     console.error('Update subscription error:', error);
@@ -678,8 +685,8 @@ router.delete('/:id', async (req: Request, res: Response) => {
     }
 
     res.json({
-      message: 'Subscription cancelled successfully',
-      subscription
+      data: subscription,
+      message: 'Subscription cancelled successfully'
     });
   } catch (error) {
     console.error('Cancel subscription error:', error);

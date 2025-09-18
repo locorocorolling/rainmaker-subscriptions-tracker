@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import Joi from 'joi';
 import { UserService } from '../services/userService';
 import { authenticateToken } from '../middleware/auth';
+import { ApiResponse, UserPreferences } from '../types/api';
 
 const router: Router = Router();
 
@@ -73,7 +74,7 @@ router.get('/preferences', authenticateToken, async (req: Request, res: Response
     }
 
     res.json({
-      preferences: user.preferences
+      data: user.preferences
     });
   } catch (error) {
     console.error('Get preferences error:', error);
@@ -143,8 +144,8 @@ router.put('/preferences', authenticateToken, async (req: Request, res: Response
     }
 
     res.json({
-      message: 'Preferences updated successfully',
-      preferences: updatedUser.preferences
+      data: updatedUser.preferences,
+      message: 'Preferences updated successfully'
     });
   } catch (error) {
     console.error('Update preferences error:', error);
@@ -220,8 +221,8 @@ router.patch('/preferences/notifications', authenticateToken, async (req: Reques
     const updatedUser = await UserService.updatePreferences(userId, updatedPreferences);
 
     res.json({
-      message: 'Notification preferences updated successfully',
-      notifications: updatedUser?.preferences?.notifications
+      data: updatedUser?.preferences?.notifications,
+      message: 'Notification preferences updated successfully'
     });
   } catch (error) {
     console.error('Update notification preferences error:', error);

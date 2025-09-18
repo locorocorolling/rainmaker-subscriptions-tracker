@@ -58,8 +58,8 @@ export const useSubscriptions = (filters?: {
     queryFn: async () => {
       const response = await api.getSubscriptions(filters);
       return {
-        subscriptions: response.subscriptions.map(transformSubscription),
-        pagination: response.pagination
+        subscriptions: response.data.subscriptions.map(transformSubscription),
+        pagination: response.data.pagination
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -84,7 +84,7 @@ export const useUpcomingRenewals = (days: number = 30) => {
     queryKey: subscriptionQueries.upcoming(days),
     queryFn: async () => {
       const response = await api.getUpcomingRenewals(days);
-      return (response as any).subscriptions?.map(transformSubscription) || [];
+      return response.data.subscriptions?.map(transformSubscription) || [];
     },
   });
 };
@@ -95,7 +95,7 @@ export const useSubscriptionStats = () => {
     queryKey: subscriptionQueries.stats(),
     queryFn: async () => {
       const response = await api.getSubscriptionStats();
-      return response;
+      return response.data;
     },
   });
 };

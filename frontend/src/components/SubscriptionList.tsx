@@ -18,7 +18,6 @@ import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
-import { useCreateSubscription } from "@/queries/subscriptions";
 import {
   createColumnHelper,
   flexRender,
@@ -57,7 +56,6 @@ const columnHelper = createColumnHelper<Subscription>();
 
 export function SubscriptionList({ subscriptions: propSubscriptions }: SubscriptionListProps) {
   const { user, token } = useAuth();
-  const createSubscription = useCreateSubscription();
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('active');
@@ -86,7 +84,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         const response = await api.getSubscriptions();
 
         // Transform API response to match frontend interface
-        const transformedSubscriptions = response.subscriptions.map((sub: any) => ({
+        const transformedSubscriptions = response.data.subscriptions.map((sub: any) => ({
           id: sub.id,
           service: sub.service,
           description: sub.description,
@@ -145,9 +143,46 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   // CRUD Handler Functions
   const handleAddSubscription = async (data: any) => {
     try {
-      await createSubscription.mutateAsync(data);
+      // Transform frontend data to backend format (same as working queries)
+      const apiData = {
+        service: data.service,
+        description: data.description,
+        ...(data.category && data.category.trim() && { category: data.category }),
+        cost: {
+          amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
+          currency: data.cost.currency
+        },
+        billingCycle: data.billingCycle,
+        firstBillingDate: new Date(data.nextRenewal).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
+        status: data.status,
+        metadata: {
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
+        }
+      };
+
+      const response = await api.createSubscription(apiData);
+
+      // Use the working transformation logic from queries
+      const newSubscription = response.data;
+      const transformedResponse = {
+        id: newSubscription.id,
+        service: newSubscription.service,
+        description: newSubscription.description || '',
+        category: newSubscription.category || '',
+        cost: {
+          amount: newSubscription.cost.amount, // Keep in cents from backend
+          currency: newSubscription.cost.currency
+        },
+        billingCycle: newSubscription.billingCycle,
+        nextRenewal: new Date(newSubscription.nextRenewal || newSubscription.firstBillingDate),
+        status: newSubscription.status,
+        metadata: newSubscription.metadata || {}
+      };
+
+      setAllSubscriptions(prev => [...prev, transformedResponse]);
       setIsAddDialogOpen(false);
-      // The React Query cache will automatically update the subscription list
     } catch (error) {
       console.error('Failed to create subscription:', error);
       throw error;
@@ -180,25 +215,26 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       const response = await api.updateSubscription(editingSubscription.id, apiData);
 
       // Transform response back to frontend format
+      const updatedData = response.data;
       const updatedSubscription: Subscription = {
         ...editingSubscription,
-        service: response.service,
-        description: response.description,
-        category: response.category,
+        service: updatedData.service,
+        description: updatedData.description,
+        category: updatedData.category,
         cost: {
-          amount: response.cost.amount, // Keep in cents for display
-          currency: response.cost.currency
+          amount: updatedData.cost.amount, // Keep in cents for display
+          currency: updatedData.cost.currency
         },
         billingCycle: {
-          value: response.billingCycle.value,
-          unit: response.billingCycle.unit
+          value: updatedData.billingCycle.value,
+          unit: updatedData.billingCycle.unit
         },
-        nextRenewal: new Date(response.nextRenewal),
-        status: response.status,
+        nextRenewal: new Date(updatedData.nextRenewal),
+        status: updatedData.status,
         metadata: {
-          color: response.metadata?.color,
-          url: response.metadata?.url,
-          notes: response.metadata?.notes
+          color: updatedData.metadata?.color,
+          url: updatedData.metadata?.url,
+          notes: updatedData.metadata?.notes
         }
       };
 
