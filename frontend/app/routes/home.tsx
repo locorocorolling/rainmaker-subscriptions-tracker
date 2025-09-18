@@ -13,11 +13,13 @@ import { useSubscriptionData } from "@/hooks/useSubscriptionData";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export default function Home() {
   const { user, logout, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const { stats, isLoading, error } = useSubscriptionData();
   const createSubscription = useCreateSubscription();
@@ -26,6 +28,7 @@ export default function Home() {
     try {
       await createSubscription.mutateAsync(data);
       setIsAddDialogOpen(false);
+      navigate('/subscriptions');
     } catch (error) {
       console.error('Failed to create subscription:', error);
       throw error;

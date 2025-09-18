@@ -248,7 +248,7 @@ export function SubscriptionForm({
         value: 1,
         unit: "month",
       },
-      nextRenewal: new Date().toISOString().split('T')[0], // Default to today's date
+      nextRenewal: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to tomorrow's date
       status: "active" as const,
     }
   }, [])

@@ -147,7 +147,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       const apiData = {
         service: data.service,
         description: data.description,
-        category: data.category,
+        ...(data.category && data.category.trim() && { category: data.category }),
         cost: {
           amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
           currency: data.cost.currency
@@ -166,24 +166,24 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
 
       // Transform response back to frontend format
       const newSubscription: Subscription = {
-        id: response.data.id,
-        service: response.data.service,
-        description: response.data.description,
-        category: response.data.category,
+        id: response.id,
+        service: response.service,
+        description: response.description,
+        category: response.category,
         cost: {
-          amount: response.data.cost.amount, // Keep in cents for display
-          currency: response.data.cost.currency
+          amount: response.cost.amount, // Keep in cents for display
+          currency: response.cost.currency
         },
         billingCycle: {
-          value: response.data.billingCycle.value,
-          unit: response.data.billingCycle.unit
+          value: response.billingCycle.value,
+          unit: response.billingCycle.unit
         },
-        nextRenewal: new Date(response.data.nextRenewal),
-        status: response.data.status,
+        nextRenewal: new Date(response.nextRenewal),
+        status: response.status,
         metadata: {
-          color: response.data.metadata?.color,
-          url: response.data.metadata?.url,
-          notes: response.data.metadata?.notes
+          color: response.metadata?.color,
+          url: response.metadata?.url,
+          notes: response.metadata?.notes
         }
       };
 
@@ -202,7 +202,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       const apiData = {
         service: data.service,
         description: data.description,
-        category: data.category,
+        ...(data.category && data.category.trim() && { category: data.category }),
         cost: {
           amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
           currency: data.cost.currency
@@ -222,23 +222,23 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       // Transform response back to frontend format
       const updatedSubscription: Subscription = {
         ...editingSubscription,
-        service: response.data.service,
-        description: response.data.description,
-        category: response.data.category,
+        service: response.service,
+        description: response.description,
+        category: response.category,
         cost: {
-          amount: response.data.cost.amount, // Keep in cents for display
-          currency: response.data.cost.currency
+          amount: response.cost.amount, // Keep in cents for display
+          currency: response.cost.currency
         },
         billingCycle: {
-          value: response.data.billingCycle.value,
-          unit: response.data.billingCycle.unit
+          value: response.billingCycle.value,
+          unit: response.billingCycle.unit
         },
-        nextRenewal: new Date(response.data.nextRenewal),
-        status: response.data.status,
+        nextRenewal: new Date(response.nextRenewal),
+        status: response.status,
         metadata: {
-          color: response.data.metadata?.color,
-          url: response.data.metadata?.url,
-          notes: response.data.metadata?.notes
+          color: response.metadata?.color,
+          url: response.metadata?.url,
+          notes: response.metadata?.notes
         }
       };
 

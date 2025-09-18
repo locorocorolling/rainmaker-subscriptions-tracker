@@ -9,7 +9,7 @@ const router: Router = Router();
 const createSubscriptionSchema = Joi.object({
   service: Joi.string().required().max(100),
   description: Joi.string().allow('').max(500),
-  category: Joi.string().required().max(50),
+  category: Joi.string().max(50),
   cost: Joi.object({
     amount: Joi.number().required().min(0),
     currency: Joi.string().required().pattern(/^[A-Z]{3}$/)

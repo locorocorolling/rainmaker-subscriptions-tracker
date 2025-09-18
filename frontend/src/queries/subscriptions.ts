@@ -110,13 +110,13 @@ export const useCreateSubscription = () => {
       const apiData = {
         service: data.service,
         description: data.description,
-        category: data.category,
+        ...(data.category && data.category.trim() && { category: data.category }),
         cost: {
           amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
-        firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
+        firstBillingDate: new Date(data.nextRenewal).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),
@@ -144,12 +144,13 @@ export const useUpdateSubscription = () => {
       const apiData = {
         service: data.service,
         description: data.description,
-        category: data.category,
+        ...(data.category && data.category.trim() && { category: data.category }),
         cost: {
           amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
+        nextRenewal: new Date(data.nextRenewal).toISOString(),
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),
