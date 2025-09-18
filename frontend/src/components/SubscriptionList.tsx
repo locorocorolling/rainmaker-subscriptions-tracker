@@ -18,6 +18,7 @@ import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog"
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
+import { useCreateSubscription } from "@/queries/subscriptions";
 import {
   createColumnHelper,
   flexRender,
@@ -56,6 +57,7 @@ const columnHelper = createColumnHelper<Subscription>();
 
 export function SubscriptionList({ subscriptions: propSubscriptions }: SubscriptionListProps) {
   const { user, token } = useAuth();
+  const createSubscription = useCreateSubscription();
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('active');
@@ -143,51 +145,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   // CRUD Handler Functions
   const handleAddSubscription = async (data: any) => {
     try {
-      // Transform frontend data to backend format
-      const apiData = {
-        service: data.service,
-        description: data.description,
-        ...(data.category && data.category.trim() && { category: data.category }),
-        cost: {
-          amount: Math.round(data.cost.amount * 100), // Convert dollars to cents
-          currency: data.cost.currency
-        },
-        billingCycle: data.billingCycle,
-        firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
-        status: data.status,
-        metadata: {
-          ...(data.metadata?.color && { color: data.metadata.color }),
-          ...(data.metadata?.url && { url: data.metadata.url }),
-          ...(data.metadata?.notes && { notes: data.metadata.notes })
-        }
-      };
-
-      const response = await api.createSubscription(apiData);
-
-      // Transform response back to frontend format
-      const newSubscription: Subscription = {
-        id: response.id,
-        service: response.service,
-        description: response.description,
-        category: response.category,
-        cost: {
-          amount: response.cost.amount, // Keep in cents for display
-          currency: response.cost.currency
-        },
-        billingCycle: {
-          value: response.billingCycle.value,
-          unit: response.billingCycle.unit
-        },
-        nextRenewal: new Date(response.nextRenewal),
-        status: response.status,
-        metadata: {
-          color: response.metadata?.color,
-          url: response.metadata?.url,
-          notes: response.metadata?.notes
-        }
-      };
-
-      setAllSubscriptions(prev => [...prev, newSubscription]);
+      await createSubscription.mutateAsync(data);
+      setIsAddDialogOpen(false);
+      // The React Query cache will automatically update the subscription list
     } catch (error) {
       console.error('Failed to create subscription:', error);
       throw error;
