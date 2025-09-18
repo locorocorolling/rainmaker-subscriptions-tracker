@@ -7,6 +7,8 @@ import { SpendSummaryCard } from "@/components/SpendSummaryCard";
 import { UpcomingRenewalsTable } from "@/components/UpcomingRenewalsTable";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
+import { Layout } from "@/components/Layout";
+import { PageHeader } from "@/components/PageHeader";
 import { useSubscriptionData } from "@/hooks/useSubscriptionData";
 import { useCreateSubscription } from "@/queries/subscriptions";
 import { useState } from "react";
@@ -41,25 +43,18 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Subscription Tracker</h1>
-          <p className="text-gray-600">Track all your subscriptions in one place</p>
-        </div>
-        {user ? (
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user.name || user.email}</span>
-            <Button variant="outline" onClick={logout}>
-              Logout
+    <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
+      <div className="container mx-auto p-6 max-w-6xl">
+        <PageHeader
+          title="Subscription Tracker"
+          subtitle="Track all your subscriptions in one place"
+        >
+          {!user && (
+            <Button onClick={() => setShowAuthModal(true)}>
+              Sign In
             </Button>
-          </div>
-        ) : (
-          <Button onClick={() => setShowAuthModal(true)}>
-            Sign In
-          </Button>
-        )}
-      </div>
+          )}
+        </PageHeader>
 
       {user ? (
         isLoading ? (
@@ -75,26 +70,37 @@ export default function Home() {
         ) : (
           /* Regular Dashboard */
           <div className="space-y-6">
-            {/* Top Section: Spend Card (left) + Add Button (right) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Consolidated Spend Card - 1/3 width on md+ */}
+            {/* Spending Overview Card */}
+            <div className="max-w-md">
               <SpendSummaryCard
                 monthlyTotal={stats.monthlyTotal}
                 upcomingTotal={stats.upcomingTotal}
+                activeCount={stats.activeCount}
                 isLoading={isLoading}
               />
+            </div>
 
-              {/* Add Subscription Button - remaining space */}
-              <div className="md:col-span-2 flex items-center justify-center md:justify-start">
-                <Button
-                  size="lg"
-                  onClick={() => setIsAddDialogOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-5 w-5" />
-                  Add Subscription
-                </Button>
-              </div>
+            {/* Add Subscription Button + Alerts */}
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <Button
+                size="lg"
+                onClick={() => setIsAddDialogOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Subscription
+              </Button>
+
+              {stats.upcomingCount > 0 && (
+                <div className="px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-orange-800">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                    <span className="text-sm font-medium">
+                      {stats.upcomingCount} renewal{stats.upcomingCount > 1 ? 's' : ''} due soon
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Upcoming Renewals Table */}
@@ -137,6 +143,7 @@ export default function Home() {
         onSubmit={handleAddSubscription}
         title="Add New Subscription"
       />
-    </div>
+      </div>
+    </Layout>
   );
 }

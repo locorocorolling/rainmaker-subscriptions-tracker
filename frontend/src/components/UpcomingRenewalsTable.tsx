@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from "@/lib/utils";
+import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor, formatBillingCycle } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router";
 import { GettingStartedSuggestions } from "@/components/GettingStartedSuggestions";
@@ -107,7 +107,7 @@ export function UpcomingRenewalsTable({
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">
-                      {formatCurrency(subscription.cost.amount / 100)}
+                      {formatCurrency(subscription.cost.amount)}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -116,9 +116,7 @@ export function UpcomingRenewalsTable({
                         {formatDate(subscription.nextRenewal)}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        Every {subscription.billingCycle.value}{' '}
-                        {subscription.billingCycle.unit}
-                        {subscription.billingCycle.value > 1 ? 's' : ''}
+                        {formatBillingCycle(subscription.billingCycle)}
                       </span>
                     </div>
                   </TableCell>

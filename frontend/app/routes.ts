@@ -6,4 +6,8 @@ export default [
     path: "/subscriptions",
     file: "./routes/subscriptions.tsx",
   },
+  {
+    path: "/analytics",
+    file: "./routes/analytics.tsx",
+  },
 ] satisfies RouteConfig;

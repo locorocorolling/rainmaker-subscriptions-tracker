@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from "@/lib/utils";
+import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor, formatBillingCycle } from "@/lib/utils";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
@@ -126,16 +126,16 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
     );
   }, [displaySubscriptions, filterStatus]);
 
-  // Calculate totals (convert from cents to dollars)
+  // Calculate totals (keep in cents for formatCurrency)
   const monthlyTotal = useMemo(() => {
     return filteredSubscriptions
       .filter(sub => sub.status === 'active')
       .reduce((total, sub) => {
         const monthlyAmount = sub.billingCycle.unit === 'year'
-          ? sub.cost.amount / 12 / 100 // Convert cents to dollars
+          ? sub.cost.amount / 12 // Keep in cents
           : sub.billingCycle.unit === 'day'
-          ? sub.cost.amount * 30 / 100
-          : sub.cost.amount / 100; // Convert cents to dollars
+          ? sub.cost.amount * 30
+          : sub.cost.amount; // Keep in cents
         return total + monthlyAmount;
       }, 0);
   }, [filteredSubscriptions]);
@@ -316,7 +316,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         header: () => (
           <div className="text-left font-medium">Cost</div>
         ),
-        cell: (info) => formatCurrency(info.getValue().amount / 100), // Convert cents to dollars for display
+        cell: (info) => formatCurrency(info.getValue().amount), // formatCurrency handles cent conversion
         enableSorting: true,
         enableColumnFilter: false,
         sortingFn: (a, b) => a.original.cost.amount - b.original.cost.amount,
@@ -327,8 +327,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         ),
         cell: (info) => (
           <span>
-            Every {info.getValue().value} {info.getValue().unit}
-            {info.getValue().value > 1 ? 's' : ''}
+            {formatBillingCycle(info.getValue())}
           </span>
         ),
         enableSorting: false,
@@ -370,25 +369,30 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         cell: (info) => {
           const subscription = info.row.original;
           return (
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-1 justify-end">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => openEditDialog(subscription)}
+                className="h-8 w-8 p-0 hover:bg-muted"
               >
                 <Edit className="h-4 w-4" />
               </Button>
+              {subscription.metadata?.url && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(subscription.metadata?.url, '_blank')}
+                  className="h-8 w-8 p-0 hover:bg-muted"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              )}
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(subscription.metadata?.url, '_blank')}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="destructive"
+                variant="ghost"
                 size="sm"
                 onClick={() => openDeleteDialog(subscription)}
+                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -438,16 +442,17 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Error: {error}</p>
-        <Button
-          onClick={() => window.location.reload()}
-          variant="outline"
-          className="mt-4"
-        >
-          Retry
-        </Button>
-      </div>
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-destructive mb-4">Error: {error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -494,65 +499,71 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1">
           <Button
             onClick={() => setIsAddDialogOpen(true)}
             size="sm"
+            className="gap-2"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Add Subscription
           </Button>
-          <Button
-            variant={filterStatus === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilterStatus('all')}
-          >
-            All
-          </Button>
-          <Button
-            variant={filterStatus === 'active' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilterStatus('active')}
-          >
-            Active
-          </Button>
-          <Button
-            variant={filterStatus === 'paused' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilterStatus('paused')}
-          >
-            Paused
-          </Button>
-          <Button
-            variant={filterStatus === 'cancelled' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilterStatus('cancelled')}
-          >
-            Cancelled
-          </Button>
+          <div className="flex gap-1 ml-2">
+            <Button
+              variant={filterStatus === 'all' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setFilterStatus('all')}
+            >
+              All
+            </Button>
+            <Button
+              variant={filterStatus === 'active' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setFilterStatus('active')}
+            >
+              Active
+            </Button>
+            <Button
+              variant={filterStatus === 'paused' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setFilterStatus('paused')}
+            >
+              Paused
+            </Button>
+            <Button
+              variant={filterStatus === 'cancelled' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setFilterStatus('cancelled')}
+            >
+              Cancelled
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex gap-2">
+
+        <div className="flex gap-1">
           <Button
-            variant={sorting[0]?.id === 'service' ? 'default' : 'outline'}
+            variant={sorting[0]?.id === 'service' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setSorting([{ id: 'service', desc: sorting[0]?.id === 'service' ? !sorting[0].desc : false }])}
+            className="text-xs"
           >
-            Sort by Name {sorting[0]?.id === 'service' && (sorting[0].desc ? '↓' : '↑')}
+            Name {sorting[0]?.id === 'service' && (sorting[0].desc ? '↓' : '↑')}
           </Button>
           <Button
-            variant={sorting[0]?.id === 'nextRenewal' ? 'default' : 'outline'}
+            variant={sorting[0]?.id === 'nextRenewal' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setSorting([{ id: 'nextRenewal', desc: sorting[0]?.id === 'nextRenewal' ? !sorting[0].desc : false }])}
+            className="text-xs"
           >
-            Sort by Renewal {sorting[0]?.id === 'nextRenewal' && (sorting[0].desc ? '↓' : '↑')}
+            Renewal {sorting[0]?.id === 'nextRenewal' && (sorting[0].desc ? '↓' : '↑')}
           </Button>
           <Button
-            variant={sorting[0]?.id === 'cost' ? 'default' : 'outline'}
+            variant={sorting[0]?.id === 'cost' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setSorting([{ id: 'cost', desc: sorting[0]?.id === 'cost' ? !sorting[0].desc : false }])}
+            className="text-xs"
           >
-            Sort by Cost {sorting[0]?.id === 'cost' && (sorting[0].desc ? '↓' : '↑')}
+            Cost {sorting[0]?.id === 'cost' && (sorting[0].desc ? '↓' : '↑')}
           </Button>
         </div>
       </div>
@@ -561,9 +572,6 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       <Card>
         <CardHeader>
           <CardTitle>Subscriptions</CardTitle>
-          <CardDescription>
-            Track all your subscriptions in one place
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -600,8 +608,17 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           </Table>
 
           {table.getRowModel().rows.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No subscriptions found
+            <div className="text-center py-12">
+              <div className="text-muted-foreground mb-4">No subscriptions found</div>
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add your first subscription
+              </Button>
             </div>
           )}
         </CardContent>
@@ -623,7 +640,10 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           service: editingSubscription.service,
           description: editingSubscription.description,
           category: editingSubscription.category,
-          cost: editingSubscription.cost,
+          cost: {
+            amount: editingSubscription.cost.amount / 100, // Convert cents to dollars for editing
+            currency: editingSubscription.cost.currency
+          },
           billingCycle: editingSubscription.billingCycle,
           nextRenewal: editingSubscription.nextRenewal.toISOString().split('T')[0],
           status: editingSubscription.status,

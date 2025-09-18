@@ -298,7 +298,7 @@ export function SubscriptionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 text-foreground border-border">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-6">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
@@ -315,7 +315,7 @@ export function SubscriptionForm({
                 name="service"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Service Name<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium">Service Name<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
                       <AutocompleteInput
                         options={popularServices.map(service => ({
@@ -348,7 +348,7 @@ export function SubscriptionForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Move cost field here to be beside billing cycle */}
                 <div className="space-y-2">
-                  <label className="text-base font-medium">Cost<span className="text-amber-500 ml-0.5">*</span></label>
+                  <label className="text-sm font-medium">Cost<span className="text-amber-500 ml-0.5">*</span></label>
                   <div className="flex relative">
                     <FormField
                       control={form.control}
@@ -412,7 +412,7 @@ export function SubscriptionForm({
                   name="billingCycle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">Billing Cycle<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium">Billing Cycle<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={(value) => {
@@ -453,7 +453,7 @@ export function SubscriptionForm({
                 render={({ field }) => (
                   field.value?.unit === "day" ? (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">Number of Days<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                      <FormLabel className="text-sm font-medium">Number of Days<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -481,7 +481,7 @@ export function SubscriptionForm({
                 name="nextRenewal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Next Renewal Date<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium">Next Renewal Date<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -496,7 +496,7 @@ export function SubscriptionForm({
               <button
                 type="button"
                 onClick={() => setShowOptionalFields(!showOptionalFields)}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-b border-gray-200 dark:border-gray-700 pb-2 w-full cursor-pointer"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors border-b border-border/30 pb-2 w-full cursor-pointer"
               >
                 <span>Additional</span>
                 {showOptionalFields ? (
@@ -587,8 +587,8 @@ export function SubscriptionForm({
             </div>
 
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

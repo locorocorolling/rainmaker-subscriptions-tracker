@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { formatCurrency } from "@/lib/utils"
 
 interface DeleteConfirmationDialogProps {
   open: boolean
@@ -64,7 +65,7 @@ export function DeleteConfirmationDialog({
               <div>
                 <div className="font-medium">{subscription.service}</div>
                 <div className="text-sm text-muted-foreground">
-                  {subscription.cost ? `${subscription.cost.amount / 100} ${subscription.cost.currency}` : ''}
+                  {subscription.cost ? formatCurrency(subscription.cost.amount) : ''}
                 </div>
               </div>
               {subscription.status && (

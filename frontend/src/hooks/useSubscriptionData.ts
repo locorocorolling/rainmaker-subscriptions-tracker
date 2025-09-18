@@ -6,6 +6,7 @@ export interface SubscriptionStats {
   activeCount: number;
   monthlyTotal: number;
   upcomingTotal: number;
+  upcomingCount: number;
   upcomingSubscriptions: Subscription[];
   nextRenewalDays: number | null;
 }
@@ -22,6 +23,7 @@ export function useSubscriptionData() {
         activeCount: 0,
         monthlyTotal: 0,
         upcomingTotal: 0,
+        upcomingCount: 0,
         upcomingSubscriptions: [],
         nextRenewalDays: null,
       };
@@ -29,13 +31,13 @@ export function useSubscriptionData() {
 
     const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
 
-    // Calculate monthly total (convert from cents to dollars)
+    // Calculate monthly total (keep in cents for formatCurrency)
     const monthlyTotal = activeSubscriptions.reduce((total, sub) => {
       const monthlyAmount = sub.billingCycle.unit === 'year'
-        ? sub.cost.amount / 12 / 100 // Convert cents to dollars
+        ? sub.cost.amount / 12 // Keep in cents
         : sub.billingCycle.unit === 'day'
-        ? sub.cost.amount * 30 / 100
-        : sub.cost.amount / 100; // Convert cents to dollars
+        ? sub.cost.amount * 30
+        : sub.cost.amount; // Keep in cents
       return total + monthlyAmount;
     }, 0);
 
@@ -47,9 +49,9 @@ export function useSubscriptionData() {
       .filter(sub => sub.nextRenewal >= now && sub.nextRenewal <= thirtyDaysFromNow)
       .sort((a, b) => a.nextRenewal.getTime() - b.nextRenewal.getTime());
 
-    // Calculate total cost for upcoming renewals
+    // Calculate total cost for upcoming renewals (keep in cents)
     const upcomingTotal = upcomingSubscriptions.reduce((total, sub) => {
-      return total + (sub.cost.amount / 100); // Convert cents to dollars
+      return total + sub.cost.amount; // Keep in cents for formatCurrency
     }, 0);
 
     // Get next renewal in days
@@ -63,6 +65,7 @@ export function useSubscriptionData() {
       activeCount: activeSubscriptions.length,
       monthlyTotal,
       upcomingTotal,
+      upcomingCount: upcomingSubscriptions.length,
       upcomingSubscriptions,
       nextRenewalDays,
     };

@@ -4,10 +4,11 @@ import { formatCurrency } from "@/lib/utils";
 interface SpendSummaryCardProps {
   monthlyTotal: number;
   upcomingTotal: number;
+  activeCount: number;
   isLoading?: boolean;
 }
 
-export function SpendSummaryCard({ monthlyTotal, upcomingTotal, isLoading }: SpendSummaryCardProps) {
+export function SpendSummaryCard({ monthlyTotal, upcomingTotal, activeCount, isLoading }: SpendSummaryCardProps) {
   if (isLoading) {
     return (
       <Card>
@@ -31,27 +32,29 @@ export function SpendSummaryCard({ monthlyTotal, upcomingTotal, isLoading }: Spe
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Subscription Spending</CardTitle>
+        <CardTitle className="text-lg">Spending Overview</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">This Month:</span>
-          <span className="text-2xl font-bold">{formatCurrency(monthlyTotal)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Next 30 Days:</span>
-          <span className="text-xl font-semibold text-blue-600">
-            {formatCurrency(upcomingTotal)}
-          </span>
-        </div>
-        <div className="pt-2 border-t">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Total Forecast:</span>
-            <span className="text-lg font-bold text-green-600">
-              {formatCurrency(monthlyTotal + upcomingTotal)}
-            </span>
+      <CardContent className="space-y-6">
+        {/* Primary metric */}
+        <div className="text-center">
+          <div className="text-sm text-muted-foreground mb-2">Monthly Spending</div>
+          <div className="text-4xl font-bold text-foreground">{formatCurrency(monthlyTotal)}</div>
+          <div className="text-sm text-muted-foreground mt-2">
+            {activeCount} active subscription{activeCount !== 1 ? 's' : ''}
           </div>
         </div>
+
+        {/* Secondary metric */}
+        {upcomingTotal > 0 && (
+          <div className="pt-4 border-t">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Upcoming renewals (30 days):</span>
+              <span className="text-lg font-semibold text-orange-600">
+                {formatCurrency(upcomingTotal)}
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
