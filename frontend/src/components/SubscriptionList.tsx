@@ -156,9 +156,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 
@@ -210,9 +210,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         billingCycle: data.billingCycle,
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 

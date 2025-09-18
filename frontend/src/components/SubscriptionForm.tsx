@@ -330,7 +330,7 @@ export function SubscriptionForm({
                         onSelectOption={(option) => {
                           // Auto-set the category when a suggested service is selected
                           if (option.metadata?.category) {
-                            form.setValue('category', option.metadata.category)
+                            form.setValue('category', option.metadata?.category)
                           }
                         }}
                         placeholder="Netflix, Spotify, Custom Service..."
