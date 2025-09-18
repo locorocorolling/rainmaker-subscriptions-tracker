@@ -208,6 +208,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
+        nextRenewal: new Date(data.nextRenewal),
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),
