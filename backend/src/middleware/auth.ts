@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { UserModel } from '../models/User';
+import { UserService } from '../services/userService';
 
 interface AuthRequest extends Request {
   user?: any;
 }
 
-export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -16,24 +16,20 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    const user = UserModel.findById(decoded.userId).select('-password');
+    const user = await UserService.verifyToken(token);
+    if (!user) {
+      res.status(401).json({ message: 'Invalid token' });
+      return;
+    }
 
-    user.then((user) => {
-      if (!user) {
-        res.status(401).json({ message: 'Invalid token' });
-        return;
-      }
-
-      req.user = { ...user.toObject(), userId: user._id.toString() };
-      next();
-    });
+    req.user = { ...user.toObject(), userId: (user._id as string).toString() };
+    next();
   } catch (error) {
     res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
 
-export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -43,16 +39,11 @@ export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    const user = UserModel.findById(decoded.userId).select('-password');
-
-    user.then((user) => {
-      if (user) {
-        req.user = { ...user.toObject(), userId: user._id.toString() };
-      }
-
-      next();
-    });
+    const user = await UserService.verifyToken(token);
+    if (user) {
+      req.user = { ...user.toObject(), userId: (user._id as string).toString() };
+    }
+    next();
   } catch (error) {
     next();
   }

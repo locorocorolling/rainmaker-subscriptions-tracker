@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { UserModel } from '../models/User';
+import { UserService } from '../services/userService';
 import { generateToken, hashPassword, comparePassword, validatePassword, validateEmail } from '../utils/auth';
 import Joi from 'joi';
 
@@ -76,20 +76,18 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const { name, email, password } = req.body;
 
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
+    const userExists = await UserService.userExists(email);
+    if (userExists) {
       res.status(400).json({ message: 'User already exists with this email' });
       return;
     }
 
-    const user = new UserModel({
-      firstName: name,
-      lastName: '',
+    const user = await UserService.createUser({
       email,
-      password: password // Let the model's pre-save middleware handle hashing
+      password,
+      firstName: name,
+      lastName: ''
     });
-
-    await user.save();
 
     const token = generateToken(user);
 
@@ -162,29 +160,16 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ email }).select('+password');
-    if (!user) {
+    const result = await UserService.authenticateUser({ email, password });
+    if (!result) {
       res.status(401).json({ message: 'Invalid credentials' });
       return;
     }
-
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      res.status(401).json({ message: 'Invalid credentials' });
-      return;
-    }
-
-    const token = generateToken(user);
 
     res.json({
       message: 'Login successful',
-      token,
-      user: {
-        id: user._id,
-        name: user.firstName,
-        email: user.email,
-        createdAt: user.createdAt
-      }
+      token: result.token,
+      user: result.user
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -249,10 +234,7 @@ router.get('/me', async (req: Request, res: Response) => {
       return;
     }
 
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-
-    const user = await UserModel.findById(decoded.userId).select('-password');
+    const user = await UserService.verifyToken(token);
     if (!user) {
       res.status(401).json({ message: 'Invalid token' });
       return;
