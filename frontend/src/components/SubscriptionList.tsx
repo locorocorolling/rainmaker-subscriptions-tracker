@@ -126,16 +126,16 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
     );
   }, [displaySubscriptions, filterStatus]);
 
-  // Calculate totals (convert from cents to dollars)
+  // Calculate totals (keep in cents for formatCurrency)
   const monthlyTotal = useMemo(() => {
     return filteredSubscriptions
       .filter(sub => sub.status === 'active')
       .reduce((total, sub) => {
         const monthlyAmount = sub.billingCycle.unit === 'year'
-          ? sub.cost.amount / 12 / 100 // Convert cents to dollars
+          ? sub.cost.amount / 12 // Keep in cents
           : sub.billingCycle.unit === 'day'
-          ? sub.cost.amount * 30 / 100
-          : sub.cost.amount / 100; // Convert cents to dollars
+          ? sub.cost.amount * 30
+          : sub.cost.amount; // Keep in cents
         return total + monthlyAmount;
       }, 0);
   }, [filteredSubscriptions]);
