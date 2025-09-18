@@ -21,9 +21,25 @@
 - **Emotional claims** - "Users love it", "delightful experience"
 - **Vague benefits** - "Better performance" (be specific)
 
+## When to Apply Structure vs Language Only
+
+### Structure + Language (Technical Decision Records)
+**Use the decision format below for:**
+- Architecture decision records (ADRs)
+- Technical choice documentation
+- New tool/framework evaluations
+- Infrastructure decisions
+
+### Language Principles Only (Keep Existing Structure)
+**Apply language principles to existing structure for:**
+- Interview preparation documents
+- Project status reports
+- Meeting notes and summaries
+- Existing documentation with appropriate structure
+
 ## Documentation Structure
 
-### Decision Format
+### Decision Format (for ADRs and technical choices)
 ```markdown
 ### Tool/Choice Name (~X hours saved)
 **Problem:** Specific technical challenge being solved
