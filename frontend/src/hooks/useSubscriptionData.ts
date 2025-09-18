@@ -6,6 +6,7 @@ export interface SubscriptionStats {
   activeCount: number;
   monthlyTotal: number;
   upcomingTotal: number;
+  upcomingCount: number;
   upcomingSubscriptions: Subscription[];
   nextRenewalDays: number | null;
 }
@@ -22,6 +23,7 @@ export function useSubscriptionData() {
         activeCount: 0,
         monthlyTotal: 0,
         upcomingTotal: 0,
+        upcomingCount: 0,
         upcomingSubscriptions: [],
         nextRenewalDays: null,
       };
@@ -63,6 +65,7 @@ export function useSubscriptionData() {
       activeCount: activeSubscriptions.length,
       monthlyTotal,
       upcomingTotal,
+      upcomingCount: upcomingSubscriptions.length,
       upcomingSubscriptions,
       nextRenewalDays,
     };

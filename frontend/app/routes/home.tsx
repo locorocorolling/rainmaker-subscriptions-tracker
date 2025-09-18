@@ -79,8 +79,8 @@ export default function Home() {
                 isLoading={isLoading}
               />
 
-              {/* Add Subscription Button - remaining space */}
-              <div className="md:col-span-2 flex items-center justify-center md:justify-start">
+              {/* Add Subscription Button + Alerts - remaining space */}
+              <div className="md:col-span-2 flex flex-col items-center md:items-start justify-center gap-4">
                 <Button
                   size="lg"
                   onClick={() => setIsAddDialogOpen(true)}
@@ -89,6 +89,17 @@ export default function Home() {
                   <Plus className="h-5 w-5" />
                   Add Subscription
                 </Button>
+
+                {stats.upcomingCount > 0 && (
+                  <div className="px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-orange-800">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                      <span className="text-sm font-medium">
+                        {stats.upcomingCount} renewal{stats.upcomingCount > 1 ? 's' : ''} due soon
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

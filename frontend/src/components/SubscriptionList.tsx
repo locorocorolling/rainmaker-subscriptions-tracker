@@ -316,7 +316,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         header: () => (
           <div className="text-left font-medium">Cost</div>
         ),
-        cell: (info) => formatCurrency(info.getValue().amount / 100), // Convert cents to dollars for display
+        cell: (info) => formatCurrency(info.getValue().amount), // formatCurrency handles cent conversion
         enableSorting: true,
         enableColumnFilter: false,
         sortingFn: (a, b) => a.original.cost.amount - b.original.cost.amount,

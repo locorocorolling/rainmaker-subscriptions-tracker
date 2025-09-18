@@ -107,7 +107,7 @@ export function UpcomingRenewalsTable({
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">
-                      {formatCurrency(subscription.cost.amount / 100)}
+                      {formatCurrency(subscription.cost.amount)}
                     </div>
                   </TableCell>
                   <TableCell>
