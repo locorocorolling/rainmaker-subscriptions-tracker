@@ -119,9 +119,9 @@ export const useCreateSubscription = () => {
         firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 
@@ -152,9 +152,9 @@ export const useUpdateSubscription = () => {
         billingCycle: data.billingCycle,
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 

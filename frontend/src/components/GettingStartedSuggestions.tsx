@@ -19,7 +19,7 @@ export function GettingStartedSuggestions({ onAddSubscription }: GettingStartedS
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Step 1: Streaming Services */}
-          <div className="flex flex-col items-center p-6 border rounded-lg bg-card">
+          <div className="flex flex-col items-center p-6 border-0 ring-1 ring-border/20 rounded-lg bg-card">
             <div className="flex items-center gap-2 mb-3">
               <Tv className="h-6 w-6 text-blue-600" />
               <Music className="h-5 w-5 text-green-600" />
@@ -31,7 +31,7 @@ export function GettingStartedSuggestions({ onAddSubscription }: GettingStartedS
           </div>
 
           {/* Step 2: Monthly Subscriptions */}
-          <div className="flex flex-col items-center p-6 border rounded-lg bg-card">
+          <div className="flex flex-col items-center p-6 border-0 ring-1 ring-border/20 rounded-lg bg-card">
             <div className="flex items-center gap-2 mb-3">
               <Dumbbell className="h-6 w-6 text-orange-600" />
               <Cloud className="h-5 w-5 text-sky-600" />
@@ -43,7 +43,7 @@ export function GettingStartedSuggestions({ onAddSubscription }: GettingStartedS
           </div>
 
           {/* Step 3: Annual Renewals */}
-          <div className="flex flex-col items-center p-6 border rounded-lg bg-card">
+          <div className="flex flex-col items-center p-6 border-0 ring-1 ring-border/20 rounded-lg bg-card">
             <div className="flex items-center gap-2 mb-3">
               <Shield className="h-6 w-6 text-purple-600" />
               <Globe className="h-5 w-5 text-indigo-600" />

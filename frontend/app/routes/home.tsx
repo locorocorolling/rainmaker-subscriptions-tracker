@@ -92,7 +92,7 @@ export default function Home() {
               </Button>
 
               {stats.upcomingCount > 0 && (
-                <div className="px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="px-3 py-2 bg-orange-50 border-0 ring-1 ring-orange-200/50 rounded-lg">
                   <div className="flex items-center gap-2 text-orange-800">
                     <div className="w-2 h-2 bg-orange-500 rounded-full" />
                     <span className="text-sm font-medium">

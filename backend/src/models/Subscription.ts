@@ -177,13 +177,7 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>({
   },
   nextRenewal: {
     type: Date,
-    required: true,
-    validate: {
-      validator: function(v: Date) {
-        return v >= this.firstBillingDate;
-      },
-      message: 'Next renewal date must be after first billing date'
-    }
+    required: true
   },
   lastRenewal: {
     type: Date,

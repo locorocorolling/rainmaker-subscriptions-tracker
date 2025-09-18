@@ -58,7 +58,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   const { user, token } = useAuth();
   const [sorting, setSorting] = useState<SortingState>([{ id: 'nextRenewal', desc: false }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused' | 'cancelled'>('active');
 
   // CRUD state
   const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([]);
@@ -156,9 +156,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         firstBillingDate: data.nextRenewal, // Backend uses firstBillingDate
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 
@@ -208,11 +208,12 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
+        nextRenewal: new Date(data.nextRenewal),
         status: data.status,
         metadata: {
-          ...(data.metadata.color && { color: data.metadata.color }),
-          ...(data.metadata.url && { url: data.metadata.url }),
-          ...(data.metadata.notes && { notes: data.metadata.notes })
+          ...(data.metadata?.color && { color: data.metadata.color }),
+          ...(data.metadata?.url && { url: data.metadata.url }),
+          ...(data.metadata?.notes && { notes: data.metadata.notes })
         }
       };
 
@@ -378,7 +379,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
               >
                 <Edit className="h-4 w-4" />
               </Button>
-              {subscription.metadata?.url && (
+              {/* {subscription.metadata?.url && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -387,7 +388,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
-              )}
+              )} */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -459,7 +460,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
@@ -470,7 +471,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Monthly Total</CardTitle>
@@ -479,20 +480,6 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
             <div className="text-2xl font-bold">
               {formatCurrency(monthlyTotal)}
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Renewal</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {sortedSubscriptions.length > 0 
-                ? getDaysUntilRenewal(sortedSubscriptions[0].nextRenewal)
-                : 'N/A'}
-            </div>
-            <p className="text-xs text-muted-foreground">days</p>
           </CardContent>
         </Card>
       </div>

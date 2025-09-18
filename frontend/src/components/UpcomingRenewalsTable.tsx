@@ -92,7 +92,7 @@ export function UpcomingRenewalsTable({
                       {subscription.metadata?.color && (
                         <div
                           className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: subscription.metadata.color }}
+                          style={{ backgroundColor: subscription.metadata?.color }}
                         />
                       )}
                       <div>

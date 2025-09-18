@@ -41,6 +41,7 @@ const updateSubscriptionSchema = Joi.object({
     unit: Joi.string().valid('day', 'month', 'year')
   }),
   firstBillingDate: Joi.date().min('now'),
+  nextRenewal: Joi.date().min('now'),
   status: Joi.string().valid('active', 'paused', 'cancelled', 'expired'),
   metadata: Joi.object({
     color: Joi.string().pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),

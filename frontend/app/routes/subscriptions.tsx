@@ -4,11 +4,22 @@ import { Layout } from "@/components/Layout";
 import { PageHeader } from "@/components/PageHeader";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { useCreateSubscription } from "@/queries/subscriptions";
-import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Subscriptions() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const createSubscription = useCreateSubscription();
+
+  // Redirect to home if user is not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/");
+    }
+  }, [user, loading, navigate]);
 
   const handleAddSubscription = async (data: any) => {
     try {
