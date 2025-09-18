@@ -31,7 +31,7 @@
       "@/services/*": ["services/*"],
       "@/models/*": ["models/*"],
       "@/jobs/*": ["jobs/*"],
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": [
