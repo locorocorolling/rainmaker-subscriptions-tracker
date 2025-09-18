@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor } from "@/lib/utils";
+import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor, formatBillingCycle } from "@/lib/utils";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
@@ -327,8 +327,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         ),
         cell: (info) => (
           <span>
-            Every {info.getValue().value} {info.getValue().unit}
-            {info.getValue().value > 1 ? 's' : ''}
+            {formatBillingCycle(info.getValue())}
           </span>
         ),
         enableSorting: false,

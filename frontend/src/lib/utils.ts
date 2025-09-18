@@ -12,6 +12,17 @@ export function formatCurrency(amount: number): string {
   }).format(amount / 100); // Convert from cents to dollars
 }
 
+export function formatBillingCycle(cycle: { value: number; unit: 'day' | 'month' | 'year' }): string {
+  const { value, unit } = cycle;
+
+  // Handle standard cases
+  if (value === 1 && unit === 'month') return 'Monthly';
+  if (value === 1 && unit === 'year') return 'Annually';
+
+  // Handle custom cases (keep "Every N days" format)
+  return `Every ${value} ${unit}${value > 1 ? 's' : ''}`;
+}
+
 export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
