@@ -70,37 +70,37 @@ export default function Home() {
         ) : (
           /* Regular Dashboard */
           <div className="space-y-6">
-            {/* Top Section: Spend Card (left) + Add Button (right) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Consolidated Spend Card - 1/3 width on md+ */}
+            {/* Spending Overview Card */}
+            <div className="max-w-md">
               <SpendSummaryCard
                 monthlyTotal={stats.monthlyTotal}
                 upcomingTotal={stats.upcomingTotal}
+                activeCount={stats.activeCount}
                 isLoading={isLoading}
               />
+            </div>
 
-              {/* Add Subscription Button + Alerts - remaining space */}
-              <div className="md:col-span-2 flex flex-col items-center md:items-start justify-center gap-4">
-                <Button
-                  size="lg"
-                  onClick={() => setIsAddDialogOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-5 w-5" />
-                  Add Subscription
-                </Button>
+            {/* Add Subscription Button + Alerts */}
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <Button
+                size="lg"
+                onClick={() => setIsAddDialogOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Add Subscription
+              </Button>
 
-                {stats.upcomingCount > 0 && (
-                  <div className="px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-orange-800">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                      <span className="text-sm font-medium">
-                        {stats.upcomingCount} renewal{stats.upcomingCount > 1 ? 's' : ''} due soon
-                      </span>
-                    </div>
+              {stats.upcomingCount > 0 && (
+                <div className="px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-orange-800">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                    <span className="text-sm font-medium">
+                      {stats.upcomingCount} renewal{stats.upcomingCount > 1 ? 's' : ''} due soon
+                    </span>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Upcoming Renewals Table */}
