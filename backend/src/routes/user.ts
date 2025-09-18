@@ -206,12 +206,14 @@ router.patch('/preferences/notifications', authenticateToken, async (req: Reques
 
     // Merge notification updates with existing preferences
     const updatedNotifications = {
-      ...currentUser.preferences?.notifications,
+      ...currentUser.preferences?.notifications?.toObject(),
       ...req.body
     };
 
     const updatedPreferences = {
-      ...currentUser.preferences,
+      theme: currentUser.preferences?.theme,
+      currency: currentUser.preferences?.currency,
+      timezone: currentUser.preferences?.timezone,
       notifications: updatedNotifications
     };
 
