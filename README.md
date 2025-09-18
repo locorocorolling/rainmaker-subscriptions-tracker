@@ -4,52 +4,39 @@
 
 A modern subscription tracking application that helps users manage recurring subscriptions, monitor spending patterns, and receive intelligent renewal notifications.
 
-**🚀 [Live Demo](https://placeholder-demo-url.railway.app)** | **📊 [API Documentation](./docs/api)** | **🏗️ [System Architecture](./docs/TECHNICAL_DECISIONS.md)**
+**📊 [API Documentation](http://localhost:3001/api-docs)** | **🏗️ [System Architecture](./docs/TECHNICAL_DECISIONS.md)** | **🎯 [Demo Highlights](./working-docs/demos/DEMO_SCRIPT_NOTES.md)**
 
 ## Tech Stack
 
-**Frontend:** React + Vite + TypeScript + TanStack Query + shadcn/ui
-**Backend:** Node.js + Express + TypeScript + MongoDB + Redis
-**Infrastructure:** Docker Compose + Background Jobs + Redis
-**Auth & Security:** JWT authentication + protected routes
-**Deployment:** Railway (demo) / Docker (production)
+**Frontend:** React Router 7 + TypeScript + TanStack Query + Radix UI + shadcn/ui
+**Backend:** Node.js + Express + TypeScript + Mongoose + BullMQ
+**Infrastructure:** Docker Compose + MongoDB + Redis + Background Jobs
+**Auth & Security:** JWT + bcryptjs + protected routes + input validation
+**Testing:** Vitest + MongoDB Memory Server + comprehensive test coverage
 
 ## ⚡ Quick Start
 
-**Prerequisites:** Node.js 18+, Docker, pnpm
+**Prerequisites:** Node.js 22+, Docker, pnpm
 
 ```bash
-# 1. Clone and setup environment
-git clone <repository-url>
-cd subscription-tracker
+# 1. Clone and setup environment files (see Environment Setup below)
+# 2. Install dependencies and start infrastructure
+docker-compose -f docker-compose.dev.yml up -d  # MongoDB + Redis + admin tools
+cd frontend && pnpm install && pnpm run dev      # Terminal 1
+cd backend && pnpm install && pnpm run dev       # Terminal 2
 
-# Copy environment files
-cp .env.example .env
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-
-# 2. Install dependencies (in each folder)
-cd frontend && pnpm install
-cd ../backend && pnpm install && cd ..
-
-# 3. Start infrastructure
-docker-compose -f docker-compose.dev.yml up -d
-
-# 4. Start development servers (separate terminals)
-cd frontend && pnpm run dev    # Terminal 1
-cd backend && pnpm run dev     # Terminal 2
-
-# 5. Visit the application
+# 3. Visit the application
 # Frontend: http://localhost:5173
-# Backend API: http://localhost:3001
 # API Docs: http://localhost:3001/api-docs
 ```
 
-**Success indicators:** You should see the subscription dashboard with authentication modal and sample data.
+**Two Docker configs:** `dev.yml` (includes admin tools) vs `prod.yml` (optimized runtime)
+
+📋 **[Complete Setup Guide](./docs/SETUP_GUIDE.md)** - Detailed environment configuration, troubleshooting, and commands
 
 ## 🎯 Key Features & Technical Highlights
 
-### **Smart Currency Detection**
+### **Smart Currency Detection** → [Technical Details](./docs/TECHNICAL_DECISIONS.md#smart-currency-detection)
 - **Timezone-based detection** with locale fallback system
 - **43+ supported currencies** with proper formatting
 - **Auto-detection flow:** User timezone → Country mapping → Currency selection
@@ -64,8 +51,9 @@ cd backend && pnpm run dev     # Terminal 2
 - **Optimistic updates** with automatic rollback on failure
 - **Background refetching** for always-current subscription data
 
-### **Background Job System**
-- **node-cron scheduler** for daily renewal reminders (9:00 AM UTC)
+### **Background Job System** → [Technical Details](./docs/TECHNICAL_DECISIONS.md#email-notification-system)
+- **BullMQ + Redis** for reliable job processing
+- **Industry-standard billing logic** handling edge cases (Jan 31st → Feb 28th → Mar 31st)
 - **Email notifications** with HTML templates via Resend
 - **Configurable reminder periods** and notification preferences
 
@@ -77,110 +65,97 @@ cd backend && pnpm run dev     # Terminal 2
 ## 🚀 Development Commands
 
 ```bash
-# Local Development (recommended)
+# Start development environment
 docker-compose -f docker-compose.dev.yml up -d  # Infrastructure + admin tools
-cd frontend && pnpm run dev    # Terminal 1
-cd backend && pnpm run dev     # Terminal 2
-
-# Useful commands
-docker-compose -f docker-compose.dev.yml logs mongodb   # View MongoDB logs
-docker-compose -f docker-compose.dev.yml exec mongodb mongosh  # MongoDB shell
+pnpm run dev  # Start both frontend and backend
 
 # Admin interfaces (development only)
-# http://localhost:8081 - Mongo Express
-# http://localhost:8082 - Redis Commander
+# http://localhost:8081 - Mongo Express (MongoDB GUI)
+# http://localhost:8082 - Redis Commander (Redis GUI)
 
-# Production deployment (Railway/Coolify)
-docker-compose -f docker-compose.prod.yml up -d
-# Frontend: http://localhost:3000 (SSR production build)
-# Backend: http://localhost:3001
+# Testing and validation
+pnpm run test        # Run test suite
+pnpm run typecheck   # TypeScript validation
 ```
+
+📋 **[Development Workflow](./AGENTS.md)** - Complete commands, troubleshooting, and best practices
 
 ## 📚 Documentation
 
 ### **System Design & Architecture**
-- **[Technical Decisions](./docs/TECHNICAL_DECISIONS.md)** - Key design choices, challenges, and scaling considerations *(to be added)*
-- **[Library Choices](./docs/LIBRARY_CHOICES.md)** - Rationale for chosen libraries and time-saving decisions *(to be added)*
-- **[Best Practices](./docs/BEST_PRACTICES.md)** - Form validation, TypeScript patterns, and development standards *(to be added)*
-- **[Deployment Guide](./docs/DEPLOYMENT_OPTIONS.md)** - Railway, Docker, and production setup *(to be added)*
+- **[Technical Decisions](./docs/TECHNICAL_DECISIONS.md)** - Key design choices, challenges, and scaling considerations
+- **[Library Choices](./docs/LIBRARY_CHOICES.md)** - Rationale for chosen libraries and time-saving decisions
+- **[Best Practices](./docs/BEST_PRACTICES.md)** - Form validation, TypeScript patterns, and development standards
+- **[Deployment Guide](./docs/DEPLOYMENT_OPTIONS.md)** - Railway, Docker, and production setup
 
 ### **API & Development**
-- **[API Documentation](./docs/api)** - Interactive Swagger/OpenAPI docs
-- **[Database Schema](./docs/DATABASE_SCHEMA.md)** - MongoDB collections and indexes *(to be added)*
+- **[API Documentation](http://localhost:3001/api-docs)** - Interactive Swagger/OpenAPI docs (available during development)
+- **[Database Schema](./docs/DATABASE_SCHEMA.md)** - MongoDB collections and indexes
 - **[Development Workflow](./AGENTS.md)** - Setup, commands, and best practices
 
-## 🔧 Environment Configuration
+## 🔧 Environment Setup
 
-**Three .env files are required:**
-
-### Root `.env` (Docker infrastructure)
+**Three configuration files required:**
 ```bash
-# Copy .env.example to .env
-MONGO_ROOT_USERNAME=admin
-MONGO_ROOT_PASSWORD=secure_mongo_root_pass_change_me
-MONGO_EXPRESS_USERNAME=admin
-MONGO_EXPRESS_PASSWORD=admin_secure_pass_change_me
-REDIS_COMMANDER_USERNAME=admin
-REDIS_COMMANDER_PASSWORD=redis_admin_pass_change_me
+cp .env.example .env                    # Docker infrastructure
+cp backend/.env.example backend/.env    # Backend application
+cp frontend/.env.example frontend/.env  # Frontend client
 ```
 
-### Backend `.env` (Application config)
-```bash
-# Already configured in backend/.env.example
-MONGODB_URI=mongodb://localhost:27017/subscription_tracker
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-RESEND_API_KEY=your-resend-api-key
-# ... other backend settings
-```
-
-### Frontend `.env` (Client config)
-```bash
-# Simple frontend configuration
-VITE_API_URL=http://localhost:3001/api
-```
+📋 **[Complete Environment Guide](./docs/SETUP_GUIDE.md#environment-configuration)** - Detailed configuration and troubleshooting
 
 ## 🤖 AI Tool Disclosure
 
-This project was developed with assistance from **Claude Code** for:
+This project was developed with extensive assistance from **Claude Code** for:
 
-*(Detailed disclosure section to be completed)*
-
-- Form component implementation and validation
-- TypeScript error resolution and type safety
-- Currency formatting integration
+**AI-Assisted Implementation:**
+- Form component scaffolding and validation logic
+- TypeScript error resolution and type safety improvements
+- API endpoint implementation and testing
 - UI component development and styling
-- API endpoint testing and debugging
+- Database schema design and optimization
+- Documentation generation and formatting
 
-**What I built/modified myself:** *(to be detailed)*
+**Human-Designed Architecture:**
+- **System design and data modeling** - Query patterns, database relationships, API structure
+- **UX planning and user flows** - Paper mockups, interaction patterns, accessibility considerations
+- **Business logic and edge cases** - Billing date calculations, currency detection strategies
+- **Technical decision-making** - Library choices, deployment strategy, testing approach
+- **Project planning and prioritization** - Feature scope, time management, quality vs speed trade-offs
+
+**Philosophy:** AI accelerated implementation velocity while human judgment guided architectural decisions and user experience design.
 
 ## 📋 Project Deliverables
 
-- ✅ **GitHub Repository** with comprehensive README
-- ✅ **Working Application** with Docker setup
-- ✅ **API Documentation** via Swagger/OpenAPI
-- 🔄 **Demo Video** (5-10 minutes) *(in progress)*
-- 🔄 **Technical Document** (1-2 pages) *(in progress)*
+- ✅ **GitHub Repository** with comprehensive documentation
+- ✅ **Working Application** with Docker development environment
+- ✅ **API Documentation** via interactive Swagger UI
+- ✅ **Technical Documentation** covering design decisions and scaling considerations
 
-## 🏗️ Architecture Overview
+## 🏗️ Production-Grade Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Client  │───▶│  Express API    │───▶│   MongoDB       │
-│   (Port 5173)   │    │  (Port 3001)    │    │   (Port 27017)  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   Redis Queue   │
-                       │   (Port 6379)   │
-                       └─────────────────┘
+┌──────────────────────┐    ┌──────────────────────┐    ┌─────────────────┐
+│   React Router 7     │───▶│  Express + TypeScript│───▶│   MongoDB       │
+│   TanStack Query     │    │  JWT + Validation    │    │   Mongoose ODM  │
+│   Radix UI + shadcn  │    │  BullMQ Jobs         │    │   Aggregations  │
+└──────────────────────┘    └──────────────────────┘    └─────────────────┘
+                                        │
+                                        ▼
+                               ┌─────────────────┐
+                               │   Redis + BullMQ│
+                               │   Job Scheduler │
+                               │   Email Queue   │
+                               └─────────────────┘
 ```
 
-**Key Components:**
-- **Frontend:** React SPA with TanStack Query for state management
-- **Backend:** RESTful API with JWT authentication and background jobs
-- **Database:** MongoDB with optimized indexes and aggregation pipelines
-- **Queue:** Redis-backed job queue for email notifications and renewals
+**Enterprise-Level Features:**
+- **Frontend:** Type-safe forms with Zod validation, optimistic updates, professional UI components
+- **Backend:** Comprehensive middleware stack, background job processing, industry-standard date calculations
+- **Database:** Optimized indexes, aggregation pipelines, edge case handling for financial data
+- **Infrastructure:** Docker Compose environments, Redis job queues, email notification system
+
+🎯 **[Technical Deep-Dive](./docs/TECHNICAL_DECISIONS.md)** | **[Demo Highlights](./working-docs/demos/DEMO_SCRIPT_NOTES.md)**
 
 ---
 
