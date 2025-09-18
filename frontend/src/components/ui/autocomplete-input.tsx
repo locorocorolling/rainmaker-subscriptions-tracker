@@ -145,13 +145,13 @@ export function AutocompleteInput({
       {isOpen && filteredOptions.length > 0 && (
         <div
           ref={listRef}
-          className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-900 border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-900 border-0 ring-1 ring-border/40 rounded-md shadow-lg max-h-60 overflow-auto"
         >
           {filteredOptions.map((option, index) => (
             <div
               key={option.value}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 cursor-pointer border-b last:border-b-0 transition-colors",
+                "flex items-center gap-2 px-3 py-2 cursor-pointer border-b-0 last:shadow-none [&:not(:last-child)]:shadow-[0_1px_0_0] [&:not(:last-child)]:shadow-border/20 transition-colors",
                 index === highlightedIndex
                   ? "bg-muted"
                   : "hover:bg-muted/50"
