@@ -29,6 +29,12 @@ export class BackgroundJobService {
       return;
     }
 
+    // Skip background jobs in test environment
+    if (process.env.DISABLE_BACKGROUND_JOBS === 'true' || process.env.NODE_ENV === 'test') {
+      logger.info('Background jobs disabled in test environment');
+      return;
+    }
+
     logger.info('Starting background job service...');
 
     // Daily job to check for renewal reminders (runs at 9:00 AM every day)
