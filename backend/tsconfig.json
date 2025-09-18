@@ -30,7 +30,8 @@
       "@/controllers/*": ["controllers/*"],
       "@/services/*": ["services/*"],
       "@/models/*": ["models/*"],
-      "@/jobs/*": ["jobs/*"]
+      "@/jobs/*": ["jobs/*"],
+      "@shared/*": ["../shared/*"]
     }
   },
   "include": [

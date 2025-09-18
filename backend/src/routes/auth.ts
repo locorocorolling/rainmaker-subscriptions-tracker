@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { UserService } from '../services/userService';
 import { generateToken, hashPassword, comparePassword, validatePassword, validateEmail } from '../utils/auth';
+import { AuthResponse, MessageResponse } from '@shared/types/api';
 import Joi from 'joi';
 
 const router: Router = Router();

@@ -1,5 +1,10 @@
 /**
- * Frontend API response types that mirror backend contracts
+ * Shared API response types for consistent contracts
+ *
+ * Response patterns:
+ * - ApiResponse<T>: For data endpoints (subscriptions, user preferences)
+ * - AuthResponse: For identity endpoints (login, register)
+ * - MessageResponse: For simple operations (logout)
  */
 
 // Generic API response wrapper for data endpoints

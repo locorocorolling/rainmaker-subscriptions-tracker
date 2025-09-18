@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { SubscriptionService } from '../services/subscription';
 import { authenticateToken } from '../middleware/auth';
-import { ApiResponse, PaginatedResponse } from '../types/api';
+import { ApiResponse, PaginatedResponse } from '@shared/types/api';
 import Joi from 'joi';
 
 const router: Router = Router();

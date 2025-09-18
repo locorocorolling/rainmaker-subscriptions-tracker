@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import Joi from 'joi';
 import { UserService } from '../services/userService';
 import { authenticateToken } from '../middleware/auth';
-import { ApiResponse, UserPreferences } from '../types/api';
+import { ApiResponse, UserPreferences } from '@shared/types/api';
 
 const router: Router = Router();
 
@@ -207,7 +207,7 @@ router.patch('/preferences/notifications', authenticateToken, async (req: Reques
 
     // Merge notification updates with existing preferences
     const updatedNotifications = {
-      ...currentUser.preferences?.notifications?.toObject(),
+      ...currentUser.preferences?.notifications,
       ...req.body
     };
 

@@ -1,24 +1,11 @@
 // API service for subscription management
+import type { ApiResponse, AuthResponse } from '@shared/types/api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 interface ApiError {
   message: string
   error?: string
-}
-
-interface ApiResponse<T> {
-  data: T
-  message?: string
-}
-
-interface AuthResponse {
-  token: string
-  user: {
-    id: string
-    email: string
-    name?: string
-  }
 }
 
 interface SubscriptionResponse {

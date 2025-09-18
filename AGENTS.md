@@ -344,6 +344,32 @@ Remember: This is an **append-only log** - don't worry about organization, just 
 
 ---
 
+## 📂 Shared Types Architecture
+
+### **Single Source of Truth**
+API types are centralized in `shared/types/api.ts` to ensure consistency between frontend and backend:
+
+```typescript
+// Import pattern for both frontend and backend
+import { ApiResponse, AuthResponse } from '@shared/types/api';
+```
+
+### **Response Pattern Standards**
+- **`ApiResponse<T>`**: Data endpoints (subscriptions, user preferences)
+- **`AuthResponse`**: Identity endpoints (login, register)
+- **`MessageResponse`**: Simple operations (logout)
+
+### **Path Aliases**
+Both projects use `@shared/*` path alias for clean imports:
+- **Frontend**: Configured via `tsconfig.json` + `vite-tsconfig-paths`
+- **Backend**: Configured via `tsconfig.json` + `tsx` runtime support
+
+### **Development vs Build**
+- **Dev servers**: `tsx` and Vite handle path aliases correctly
+- **Production builds**: May require additional configuration for path resolution
+
+---
+
 ## 🚀 Deployment Options
 
 ### Quick Demo: Railway
