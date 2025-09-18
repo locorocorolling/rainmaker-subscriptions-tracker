@@ -46,7 +46,7 @@ export function SpendSummaryCard({ monthlyTotal, upcomingTotal, activeCount, isL
 
         {/* Secondary metric */}
         {upcomingTotal > 0 && (
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t border-border/10">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Upcoming renewals (30 days):</span>
               <span className="text-lg font-semibold text-orange-600">

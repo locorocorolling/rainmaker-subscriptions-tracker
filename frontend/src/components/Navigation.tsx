@@ -87,7 +87,7 @@ export function DesktopNavigation({ onAddSubscription }: NavigationProps) {
   };
 
   return (
-    <div className="hidden md:flex w-64 h-screen bg-background border-r border-border/30 flex-col">
+    <div className="hidden md:flex w-64 h-screen bg-background flex-col sticky top-0">
       {/* Navigation Items */}
       <nav className="flex-1 p-4 space-y-1">
         {navigationItems.map((item) => {
@@ -133,7 +133,7 @@ export function DesktopNavigation({ onAddSubscription }: NavigationProps) {
 
       {/* User Section */}
       {user && (
-        <div className="mt-auto border-t border-border/30 p-4 space-y-3">
+        <div className="mt-auto border-t border-border/10 p-4 space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-muted-foreground" />
@@ -185,7 +185,7 @@ export function MobileNavigation({ onAddSubscription }: NavigationProps) {
         >
           <Card className="absolute bottom-20 right-4 min-w-48 shadow-lg">
             <CardContent className="p-0">
-              <div className="p-4 border-b border-border/30">
+              <div className="p-4 border-b border-border/10">
                 <p className="font-medium">{user?.name || "User"}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
@@ -229,7 +229,7 @@ export function MobileNavigation({ onAddSubscription }: NavigationProps) {
                   </span>
                 </div>
               </div>
-              <div className="p-2 border-t border-border/30">
+              <div className="p-2 border-t border-border/10">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -249,7 +249,7 @@ export function MobileNavigation({ onAddSubscription }: NavigationProps) {
       )}
 
       {/* Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/30 z-30">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/10 z-30">
         <div className="flex items-center justify-around py-2">
           {mobileNavigationItems.map((item) => {
             const Icon = item.icon;
