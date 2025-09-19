@@ -4,3 +4,15 @@ misc/
 # Environment variables
 .env
 .env.local
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Playwright MCP
+.playwright-mcp/
