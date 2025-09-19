@@ -17,8 +17,13 @@ export default defineConfig({
       ]
     },
     setupFiles: ['./tests/setup.ts'],
-    testTimeout: 10000,
-    pool: 'forks'
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    pool: 'forks',
+    env: {
+      MONGOMS_DOWNLOAD_DIR: process.env.HOME + '/.mongodb-memory-server-binaries',
+      MONGOMS_VERSION: '8.0.1'
+    }
   },
   resolve: {
     alias: {
