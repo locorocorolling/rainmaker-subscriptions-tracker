@@ -36,11 +36,10 @@ const navigationItems = [
     placeholder: true
   },
   {
-    name: "Analytics",
+    name: "Analytics (Mockup)",
     href: "/analytics",
     icon: BarChart3,
-    exact: false,
-    placeholder: true
+    exact: false
   },
   {
     name: "Settings",
@@ -210,15 +209,17 @@ export function MobileNavigation({ onAddSubscription }: NavigationProps) {
                     Soon
                   </span>
                 </div>
-                <div className="flex items-center justify-between px-3 py-2 text-muted-foreground">
-                  <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start gap-3"
+                  asChild
+                >
+                  <Link to="/analytics" onClick={() => setShowProfileMenu(false)}>
                     <BarChart3 className="w-4 h-4" />
-                    <span className="text-sm">Analytics</span>
-                  </div>
-                  <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                    Soon
-                  </span>
-                </div>
+                    <span>Analytics (Mockup)</span>
+                  </Link>
+                </Button>
                 <div className="flex items-center justify-between px-3 py-2 text-muted-foreground">
                   <div className="flex items-center gap-3">
                     <Bell className="w-4 h-4" />
