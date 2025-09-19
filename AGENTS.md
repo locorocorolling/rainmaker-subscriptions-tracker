@@ -102,10 +102,14 @@ docker-compose exec mongo mongosh  # Access MongoDB
 ```
 
 ## Testing Notes
-**Document working test commands:**
-- Unit test commands that pass
-- E2E test setup that works
-- Test data setup scripts
+**Backend test commands:**
+```bash
+pnpm run test                    # Run all tests
+pnpm run test:watch             # Watch mode
+pnpm run test:coverage          # Coverage reports
+```
+
+**For detailed testing setup, test structure, and MongoDB Memory Server requirements**, see [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md).
 
 ## Git Command Usage with Cline
 
