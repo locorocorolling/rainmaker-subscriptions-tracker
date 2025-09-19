@@ -73,7 +73,7 @@ NODE_ENV=production
 
 **Database Setup:**
 - Add MongoDB service in Coolify
-- Add Redis service for background jobs
+- Redis service included (infrastructure ready, jobs currently use node-cron)
 - Services auto-connect via Docker network
 
 **Benefits:**

@@ -9,10 +9,10 @@ A modern subscription tracking application that helps users manage recurring sub
 ## Tech Stack
 
 **Frontend:** React Router 7 + TypeScript + TanStack Query + Radix UI + shadcn/ui
-**Backend:** Node.js + Express + TypeScript + Mongoose + BullMQ
-**Infrastructure:** Docker Compose + MongoDB + Redis + Background Jobs
+**Backend:** Node.js + Express + TypeScript + Mongoose + node-cron
+**Infrastructure:** Docker Compose + MongoDB + Redis + Scheduled Jobs
 **Auth & Security:** JWT + bcryptjs + protected routes + input validation
-**Testing:** Vitest + MongoDB Memory Server + comprehensive test coverage
+**Testing:** Unit, integration & E2E tests with Vitest + MongoDB Memory Server + Playwright
 
 ## ⚡ Quick Start
 
@@ -46,13 +46,13 @@ cd backend && pnpm install && pnpm run dev       # Terminal 2
 - **Auto-category setting** when selecting suggested services
 - **Free-form input** with smart suggestions for custom services
 
-### **Real-time Data Synchronization**
-- **TanStack Query** for smart caching and background sync
+### **Smart Data Management**
+- **TanStack Query** for intelligent caching and background sync
 - **Optimistic updates** with automatic rollback on failure
 - **Background refetching** for always-current subscription data
 
 ### **Background Job System** → [Technical Details](./docs/TECHNICAL_DECISIONS.md#email-notification-system)
-- **BullMQ + Redis** for reliable job processing
+- **Node-cron scheduling** for reliable notification processing
 - **Industry-standard billing logic** handling edge cases (Jan 31st → Feb 28th → Mar 31st)
 - **Email notifications** with HTML templates via Resend
 - **Configurable reminder periods** and notification preferences
@@ -65,7 +65,7 @@ cd backend && pnpm install && pnpm run dev       # Terminal 2
 - **Subscriptions page controls:** Normal, Loading, Error, Empty with contextual messaging
 
 ![Application States](./docs/screenshots/subscriptions-populated.png)
-*Live demo showing subscription management, state controls, and professional UI handling*
+*Subscription management interface showing state controls and professional UI handling*
 
 ### **Secure Authentication**
 - **JWT-based authentication** with localStorage persistence
@@ -153,9 +153,9 @@ This project was developed with extensive assistance from **Claude Code** for:
                                         │
                                         ▼
                                ┌─────────────────┐
-                               │   Redis + BullMQ│
-                               │   Job Scheduler │
-                               │   Email Queue   │
+                               │   Node-cron Jobs│
+                               │   Email Scheduler│
+                               │   (Redis ready) │
                                └─────────────────┘
 ```
 
@@ -163,7 +163,7 @@ This project was developed with extensive assistance from **Claude Code** for:
 - **Frontend:** Type-safe forms with Zod validation, optimistic updates, professional UI components
 - **Backend:** Comprehensive middleware stack, background job processing, industry-standard date calculations
 - **Database:** Optimized indexes, aggregation pipelines, edge case handling for financial data
-- **Infrastructure:** Docker Compose environments, Redis job queues, email notification system
+- **Infrastructure:** Docker Compose environments, scheduled job system, email notification system
 
 🎯 **[Technical Deep-Dive](./docs/TECHNICAL_DECISIONS.md)** | **[Demo Highlights](./working-docs/demos/DEMO_SCRIPT_NOTES.md)**
 

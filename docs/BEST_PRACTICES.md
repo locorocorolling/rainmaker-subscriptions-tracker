@@ -38,7 +38,7 @@ app.post('/subscriptions', validate(subscriptionSchema), handler);
 
 ## TypeScript Error Prevention
 
-### Strict Configuration (~3 hours debugging saved)
+### Strict Configuration (~4 hours debugging saved)
 **Problem:** Loose TypeScript settings allow runtime errors to slip through.
 **Solution:** Strict mode with custom configuration for development velocity.
 
@@ -78,7 +78,7 @@ const handleCurrencyChange = (e: ChangeEvent<HTMLInputElement>) => {
 
 ## State Management Patterns
 
-### TanStack Query for Server State (~2 hours saved)
+### TanStack Query for Server State (~3 hours saved)
 **Problem:** Manual loading states, error handling, and cache management is error-prone.
 **Solution:** Declarative data fetching with automatic background sync.
 

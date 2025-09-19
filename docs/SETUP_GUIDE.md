@@ -24,7 +24,7 @@ Pre-configured with development settings. Key variables:
 - `MONGODB_URI`: Database connection
 - `JWT_SECRET`: Authentication token secret
 - `RESEND_API_KEY`: Email service (optional for development)
-- `REDIS_URL`: Job queue connection
+- `REDIS_URL`: Redis connection (infrastructure ready, not currently used for jobs)
 
 ### 3. Frontend `.env` (Client config)
 ```bash
@@ -234,7 +234,7 @@ subscription-tracker/
 
 1. **Explore the API**: Visit http://localhost:3001/api-docs for interactive documentation
 2. **Run tests**: `pnpm run test` in both frontend and backend directories
-3. **Check background jobs**: Monitor Redis Commander at http://localhost:8082
+3. **Check background jobs**: View application logs (jobs use node-cron, not Redis queues yet)
 4. **Review architecture**: See [Technical Decisions](./TECHNICAL_DECISIONS.md) for design rationale
 
 ## Additional Resources

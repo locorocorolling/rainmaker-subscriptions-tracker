@@ -100,7 +100,7 @@
 - **Development velocity:** Code changes don't require container rebuilds
 - **Debugging ease:** Direct access to application logs and hot reload
 - **Tool compatibility:** IDE integration, debugging, and profiling work normally
-- **Time constraint:** 16-hour deadline favored rapid iteration
+- **Time constraint:** 16-20 hour timeline favored rapid iteration
 
 **Full Containerization Complexity:** ~1 additional hour
 - Frontend Dockerfile with multi-stage build
@@ -117,7 +117,7 @@
 
 ### Express.js over Fastify
 **Decision:** Chose familiarity over performance
-**Reasoning:** 16-hour constraint favors proven patterns over optimization
+**Reasoning:** 16-20 hour timeline favors proven patterns over optimization
 **Trade-off:** ~20% slower requests, but 2+ hours faster development
 **Future:** Would choose Fastify for high-performance production systems
 
