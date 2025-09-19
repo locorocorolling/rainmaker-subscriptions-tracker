@@ -9,9 +9,13 @@ A modern subscription tracking application that helps users manage recurring sub
 ## Tech Stack
 
 **Frontend:** React Router 7 + TypeScript + TanStack Query + Radix UI + shadcn/ui
+
 **Backend:** Node.js + Express + TypeScript + Mongoose + node-cron
+
 **Infrastructure:** Docker Compose + MongoDB + Redis + Scheduled Jobs
+
 **Auth & Security:** JWT + bcryptjs + protected routes + input validation
+
 **Testing:** Unit, integration & E2E tests with Vitest + MongoDB Memory Server + Playwright
 
 ## ⚡ Quick Start
