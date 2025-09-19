@@ -214,17 +214,16 @@ export class SubscriptionService {
           preservedBillingDay
         );
 
-        // Update subscription
-        await SubscriptionModel.findOneAndUpdate(
-          { _id: subscription.id, userId: subscription.userId },
-          {
-            lastRenewal: subscription.nextRenewal,
-            nextRenewal,
-            // Ensure preservedBillingDay is set if it wasn't before
-            preservedBillingDay
-          },
-          { new: true, runValidators: true }
-        ).exec();
+
+        // Update subscription using fetch-then-update to fix Mongoose validator context issue
+        const sub = await SubscriptionModel.findOne({ _id: subscription.id, userId: subscription.userId });
+        if (!sub) throw new Error('Subscription not found during renewal');
+
+        sub.lastRenewal = subscription.nextRenewal;
+        sub.nextRenewal = nextRenewal;
+        sub.preservedBillingDay = preservedBillingDay;
+
+        await sub.save(); // This provides proper context for validators
 
         renewed++;
       } catch (error) {
