@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatCurrency, formatDate, getDaysUntilRenewal, getStatusColor, formatBillingCycle } from "@/lib/utils";
 import { SubscriptionForm } from "@/components/SubscriptionForm";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import {
@@ -769,34 +769,54 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
             </div>
           )}
         </CardContent>
+      </Card>
 
-        {/* Pagination Controls */}
-        {pagination.pages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              Page {pagination.page} of {pagination.pages} ({pagination.total} total items)
+      {/* Pagination Controls */}
+      {pagination.pages > 1 && (
+        <Card>
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-medium text-foreground">{((pagination.page - 1) * pagination.limit) + 1}</span> to{' '}
+                <span className="font-medium text-foreground">
+                  {Math.min(pagination.page * pagination.limit, pagination.total)}
+                </span>{' '}
+                of <span className="font-medium text-foreground">{pagination.total}</span> subscriptions
+              </div>
             </div>
-            <div className="flex gap-2">
+
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground mr-2">
+                Page <span className="font-medium text-foreground">{pagination.page}</span> of{' '}
+                <span className="font-medium text-foreground">{pagination.pages}</span>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                 disabled={pagination.page <= 1}
+                className="gap-1"
               >
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                 disabled={pagination.page >= pagination.pages}
+                className="gap-1"
               >
                 Next
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-        )}
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
 
       {/* CRUD Modals */}
       <SubscriptionForm
