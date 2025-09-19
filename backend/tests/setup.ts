@@ -1,4 +1,4 @@
-import { config } from './utils/config';
+import { config } from '../src/utils/config';
 
 // Override config for testing
 config.NODE_ENV = 'test';

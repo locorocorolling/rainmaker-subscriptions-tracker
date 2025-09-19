@@ -1,25 +1,30 @@
 import { SubscriptionModel, ISubscriptionDocument } from '../models/Subscription';
 import { CreateSubscriptionInput, UpdateSubscriptionInput, SubscriptionStatus } from '../../../shared/types/subscription';
-import { addMonths, addYears, addDays, isLastDayOfMonth, setDate } from 'date-fns';
+import { addMonths, addYears, addDays, isLastDayOfMonth, setDate, getDaysInMonth, isLeapYear } from 'date-fns';
 
 export class SubscriptionService {
 
   /**
-   * Create a new subscription with calculated renewal date
+   * Create a new subscription with calculated renewal date and preserved billing day
    */
   static async createSubscription(
     userId: string,
     input: CreateSubscriptionInput
   ): Promise<ISubscriptionDocument> {
-    // Calculate next renewal date based on billing cycle
-    const nextRenewal = this.calculateNextRenewal(
+    // Extract the preserved billing day from the first billing date
+    const preservedBillingDay = input.firstBillingDate.getDate();
+
+    // Calculate next renewal date using the new preserved billing day logic
+    const nextRenewal = this.calculateNextRenewalWithPreservedDay(
       input.firstBillingDate,
-      input.billingCycle
+      input.billingCycle,
+      preservedBillingDay
     );
 
     const subscriptionData = {
       ...input,
-      nextRenewal
+      nextRenewal,
+      preservedBillingDay
     };
 
     const subscription = new SubscriptionModel({
@@ -76,7 +81,7 @@ export class SubscriptionService {
     userId: string,
     updates: UpdateSubscriptionInput
   ): Promise<ISubscriptionDocument | null> {
-    // If billing cycle or dates are changing, recalculate next renewal
+    // If billing cycle or dates are changing, recalculate next renewal and preserved billing day
     if (updates.billingCycle || updates.firstBillingDate) {
       const subscription = await this.getSubscriptionById(id, userId);
       if (!subscription) return null;
@@ -84,7 +89,21 @@ export class SubscriptionService {
       const billingCycle = updates.billingCycle || subscription.billingCycle;
       const firstBillingDate = updates.firstBillingDate || subscription.firstBillingDate;
 
-      updates.nextRenewal = this.calculateNextRenewal(firstBillingDate, billingCycle);
+      // Update preserved billing day if first billing date changed
+      let preservedBillingDay = subscription.preservedBillingDay;
+      if (updates.firstBillingDate) {
+        preservedBillingDay = updates.firstBillingDate.getDate();
+        updates.preservedBillingDay = preservedBillingDay;
+      }
+
+      // Use existing preserved billing day if available, otherwise derive from current date
+      const finalPreservedBillingDay = preservedBillingDay || firstBillingDate.getDate();
+
+      updates.nextRenewal = this.calculateNextRenewalWithPreservedDay(
+        firstBillingDate,
+        billingCycle,
+        finalPreservedBillingDay
+      );
     }
 
     return SubscriptionModel.findOneAndUpdate(
@@ -177,10 +196,14 @@ export class SubscriptionService {
 
     for (const subscription of dueSubscriptions) {
       try {
-        // Calculate next renewal date
-        const nextRenewal = this.calculateNextRenewal(
+        // Use preserved billing day if available, fallback to old logic for backward compatibility
+        const preservedBillingDay = subscription.preservedBillingDay || subscription.nextRenewal.getDate();
+
+        // Calculate next renewal date using preserved billing day logic
+        const nextRenewal = this.calculateNextRenewalWithPreservedDay(
           subscription.nextRenewal,
-          subscription.billingCycle
+          subscription.billingCycle,
+          preservedBillingDay
         );
 
         // Update subscription
@@ -188,7 +211,9 @@ export class SubscriptionService {
           { _id: subscription.id, userId: subscription.userId },
           {
             lastRenewal: subscription.nextRenewal,
-            nextRenewal
+            nextRenewal,
+            // Ensure preservedBillingDay is set if it wasn't before
+            preservedBillingDay
           },
           { new: true, runValidators: true }
         ).exec();
@@ -204,7 +229,107 @@ export class SubscriptionService {
   }
 
   /**
-   * Calculate next renewal date based on billing cycle
+   * Calculate next renewal date with preserved billing day logic
+   * Implements the Monthly Anniversary Date system where the original billing day is preserved
+   */
+  static calculateNextRenewalWithPreservedDay(
+    fromDate: Date,
+    billingCycle: { value: number; unit: 'day' | 'month' | 'year' },
+    preservedBillingDay: number
+  ): Date {
+    // Validate preserved billing day
+    if (preservedBillingDay < 1 || preservedBillingDay > 31) {
+      throw new Error('preservedBillingDay must be between 1 and 31');
+    }
+
+    // Validate billing cycle unit
+    if (!['day', 'month', 'year'].includes(billingCycle.unit)) {
+      throw new Error(`Invalid billing cycle unit: ${billingCycle.unit}`);
+    }
+
+    const date = new Date(fromDate);
+
+    switch (billingCycle.unit) {
+      case 'day':
+        // Daily billing ignores preserved day logic - just add days
+        return addDays(date, billingCycle.value);
+
+      case 'month':
+        return this.calculateMonthlyRenewalWithPreservedDay(date, billingCycle.value, preservedBillingDay);
+
+      case 'year':
+        return this.calculateYearlyRenewalWithPreservedDay(date, billingCycle.value, preservedBillingDay);
+
+      default:
+        throw new Error(`Invalid billing cycle unit: ${billingCycle.unit}`);
+    }
+  }
+
+  /**
+   * Calculate monthly renewal with preserved day logic
+   */
+  private static calculateMonthlyRenewalWithPreservedDay(
+    fromDate: Date,
+    monthsToAdd: number,
+    preservedBillingDay: number
+  ): Date {
+    // Add the months first
+    const targetDate = addMonths(fromDate, monthsToAdd);
+    const targetYear = targetDate.getFullYear();
+    const targetMonth = targetDate.getMonth(); // 0-indexed
+
+    // Get the maximum days in the target month
+    const daysInTargetMonth = getDaysInMonth(targetDate);
+
+    // If preserved day exists in target month, use it
+    if (preservedBillingDay <= daysInTargetMonth) {
+      return new Date(targetYear, targetMonth, preservedBillingDay);
+    }
+
+    // Otherwise, use the last day of the target month (adjustment)
+    return new Date(targetYear, targetMonth, daysInTargetMonth);
+  }
+
+  /**
+   * Calculate yearly renewal with preserved day logic
+   * Handles the Feb 29th leap year nightmare
+   */
+  private static calculateYearlyRenewalWithPreservedDay(
+    fromDate: Date,
+    yearsToAdd: number,
+    preservedBillingDay: number
+  ): Date {
+    // Add the years first
+    const targetDate = addYears(fromDate, yearsToAdd);
+    const targetYear = targetDate.getFullYear();
+    const targetMonth = targetDate.getMonth(); // 0-indexed
+
+    // Handle February leap year special case
+    if (targetMonth === 1 && preservedBillingDay === 29) { // February (0-indexed)
+      // Check if target year is a leap year
+      if (isLeapYear(targetDate)) {
+        // Leap year - we can use Feb 29th
+        return new Date(targetYear, 1, 29);
+      } else {
+        // Non-leap year - adjust to Feb 28th
+        return new Date(targetYear, 1, 28);
+      }
+    }
+
+    // For all other months, use the same logic as monthly
+    const daysInTargetMonth = getDaysInMonth(targetDate);
+
+    // If preserved day exists in target month, use it
+    if (preservedBillingDay <= daysInTargetMonth) {
+      return new Date(targetYear, targetMonth, preservedBillingDay);
+    }
+
+    // Otherwise, use the last day of the target month
+    return new Date(targetYear, targetMonth, daysInTargetMonth);
+  }
+
+  /**
+   * Calculate next renewal date based on billing cycle (backward compatibility)
    */
   private static calculateNextRenewal(
     fromDate: Date,

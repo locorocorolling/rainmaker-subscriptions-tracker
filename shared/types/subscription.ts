@@ -82,6 +82,7 @@ export interface UpdateSubscriptionInput {
   firstBillingDate?: Date;
   nextRenewal?: Date;
   endOfMonthStrategy?: EndOfMonthStrategy;
+  preservedBillingDay?: number;
   status?: SubscriptionStatus;
   metadata?: Subscription['metadata'];
 }
