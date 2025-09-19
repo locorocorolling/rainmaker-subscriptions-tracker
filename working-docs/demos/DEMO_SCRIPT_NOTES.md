@@ -60,3 +60,8 @@
 - Professional status badges and filtering system
 - Currency formatting and date calculations
 **Why It Impresses**: Shows modern frontend development practices and attention to UX
+
+## Visual Polish Evidence
+**Screenshots**: [`docs/screenshots/`](../../docs/screenshots/) - Subscription management, data tables, error states, empty states
+**Demo Talking Point**: "Debug controls let you see all UI states instantly - no backend manipulation needed"
+**Why It Impresses**: Shows both technical implementation and demo preparation

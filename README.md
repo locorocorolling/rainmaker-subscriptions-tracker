@@ -64,6 +64,9 @@ cd backend && pnpm install && pnpm run dev       # Terminal 2
 - **Home page controls:** Normal, Loading, Error, Empty states
 - **Subscriptions page controls:** Normal, Loading, Error, Empty with contextual messaging
 
+![Application States](./docs/screenshots/subscriptions-populated.png)
+*Live demo showing subscription management, state controls, and professional UI handling*
+
 ### **Secure Authentication**
 - **JWT-based authentication** with localStorage persistence
 - **Protected routes** and API endpoint security
