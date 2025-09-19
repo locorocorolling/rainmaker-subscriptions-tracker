@@ -60,7 +60,7 @@ describe('User Preferences API', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        preferences: {
+        data: {
           theme: 'auto',
           currency: 'USD',
           timezone: 'UTC',
@@ -109,7 +109,7 @@ describe('User Preferences API', () => {
         .expect(200);
 
       expect(response.body.message).toBe('Preferences updated successfully');
-      expect(response.body.preferences).toMatchObject(updatedPreferences);
+      expect(response.body.data).toMatchObject(updatedPreferences);
 
       // Verify persistence
       const getResponse = await request(app)
@@ -117,7 +117,7 @@ describe('User Preferences API', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(getResponse.body.preferences).toMatchObject(updatedPreferences);
+      expect(getResponse.body.data).toMatchObject(updatedPreferences);
     });
 
     it('should validate theme enum values', async () => {
@@ -197,8 +197,8 @@ describe('User Preferences API', () => {
         .expect(200);
 
       // Verify initial state
-      expect(putResponse.body.preferences.notifications.email).toBe(true);
-      expect(putResponse.body.preferences.notifications.reminderDays).toBe(5);
+      expect(putResponse.body.data.notifications.email).toBe(true);
+      expect(putResponse.body.data.notifications.reminderDays).toBe(5);
 
       // Update only notifications
       const notificationUpdate = {
@@ -213,7 +213,7 @@ describe('User Preferences API', () => {
         .expect(200);
 
       expect(response.body.message).toBe('Notification preferences updated successfully');
-      expect(response.body.notifications).toMatchObject({
+      expect(response.body.data).toMatchObject({
         email: false,
         renewalReminders: true, // Should preserve existing value
         reminderDays: 10
@@ -225,11 +225,11 @@ describe('User Preferences API', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(getResponse.body.preferences.theme).toBe('dark');
-      expect(getResponse.body.preferences.currency).toBe('EUR');
-      expect(getResponse.body.preferences.notifications.email).toBe(false);
-      expect(getResponse.body.preferences.notifications.renewalReminders).toBe(true);
-      expect(getResponse.body.preferences.notifications.reminderDays).toBe(10);
+      expect(getResponse.body.data.theme).toBe('dark');
+      expect(getResponse.body.data.currency).toBe('EUR');
+      expect(getResponse.body.data.notifications.email).toBe(false);
+      expect(getResponse.body.data.notifications.renewalReminders).toBe(true);
+      expect(getResponse.body.data.notifications.reminderDays).toBe(10);
     });
 
     it('should validate notification preferences', async () => {
@@ -256,7 +256,7 @@ describe('User Preferences API', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const currentEmail = initialResponse.body.preferences.notifications.email;
+      const currentEmail = initialResponse.body.data.notifications.email;
 
       // Update only one notification field
       const response = await request(app)
@@ -265,8 +265,8 @@ describe('User Preferences API', () => {
         .send({ renewalReminders: false })
         .expect(200);
 
-      expect(response.body.notifications.renewalReminders).toBe(false);
-      expect(response.body.notifications.email).toBe(currentEmail); // Should preserve current value
+      expect(response.body.data.renewalReminders).toBe(false);
+      expect(response.body.data.email).toBe(currentEmail); // Should preserve current value
     });
   });
 

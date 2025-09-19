@@ -40,7 +40,7 @@ const notificationsSchema = Joi.object({
  *             schema:
  *               type: object
  *               properties:
- *                 preferences:
+ *                 data:
  *                   type: object
  *                   properties:
  *                     theme:
@@ -118,6 +118,32 @@ router.get('/preferences', authenticateToken, async (req: Request, res: Response
  *     responses:
  *       200:
  *         description: Preferences updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     theme:
+ *                       type: string
+ *                       enum: [light, dark, auto]
+ *                     currency:
+ *                       type: string
+ *                     timezone:
+ *                       type: string
+ *                     notifications:
+ *                       type: object
+ *                       properties:
+ *                         email:
+ *                           type: boolean
+ *                         renewalReminders:
+ *                           type: boolean
+ *                         reminderDays:
+ *                           type: number
+ *                 message:
+ *                   type: string
  *       400:
  *         description: Validation error
  *       401:
@@ -179,6 +205,22 @@ router.put('/preferences', authenticateToken, async (req: Request, res: Response
  *     responses:
  *       200:
  *         description: Notification preferences updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     email:
+ *                       type: boolean
+ *                     renewalReminders:
+ *                       type: boolean
+ *                     reminderDays:
+ *                       type: number
+ *                 message:
+ *                   type: string
  *       400:
  *         description: Validation error
  *       401:
