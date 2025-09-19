@@ -19,7 +19,11 @@ A modern subscription tracking application that helps users manage recurring sub
 **Prerequisites:** Node.js 22+, Docker, pnpm
 
 ```bash
-# 1. Clone and setup environment files (see Environment Setup below)
+# 1. Setup environment files
+cp .env.example .env                    # Docker infrastructure
+cp backend/.env.example backend/.env    # Backend application
+cp frontend/.env.example frontend/.env  # Frontend client
+
 # 2. Install dependencies and start infrastructure
 docker-compose -f docker-compose.dev.yml up -d  # MongoDB + Redis + admin tools
 cd frontend && pnpm install && pnpm run dev      # Terminal 1
@@ -111,6 +115,8 @@ cp .env.example .env                    # Docker infrastructure
 cp backend/.env.example backend/.env    # Backend application
 cp frontend/.env.example frontend/.env  # Frontend client
 ```
+
+**No modifications needed** - all example files have working defaults for development. Optional: update passwords and JWT secrets for enhanced security.
 
 📋 **[Complete Environment Guide](./docs/SETUP_GUIDE.md#environment-configuration)** - Detailed configuration and troubleshooting
 
