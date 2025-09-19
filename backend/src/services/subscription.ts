@@ -177,7 +177,7 @@ export class SubscriptionService {
           stats.yearlyTotal += sub.cost.amount * 12;
         } else if (sub.billingCycle.unit === 'year') {
           stats.yearlyTotal += sub.cost.amount;
-          stats.monthlyTotal += sub.cost.amount / 12;
+          stats.monthlyTotal += Math.round(sub.cost.amount / 12);
         } else if (sub.billingCycle.unit === 'day') {
           // Approximate monthly cost for daily subscriptions
           stats.monthlyTotal += sub.cost.amount * 30;
