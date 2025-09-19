@@ -63,6 +63,12 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   // CRUD state
   const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([]);
   const [stats, setStats] = useState<any>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -82,7 +88,19 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       try {
         setIsLoading(true);
         setError(null);
-        const response = await api.getSubscriptions();
+        const response = await api.getSubscriptions({
+          page: pagination.page,
+          limit: pagination.limit
+        });
+
+        // Update pagination metadata from API response
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.pagination.total,
+            pages: response.data.pagination.pages
+          }));
+        }
 
         // Transform API response to match frontend interface
         const transformedSubscriptions = response.data.subscriptions.map((sub: any) => ({
@@ -120,7 +138,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
     };
 
     fetchSubscriptions();
-  }, [token]);
+  }, [token, pagination.page, pagination.limit]);
 
   // Helper function to refresh stats
   const refreshStats = async () => {
@@ -199,6 +217,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       setAllSubscriptions(prev => [...prev, transformedResponse]);
       await refreshStats(); // Refresh stats after adding subscription
       setIsAddDialogOpen(false);
+
+      // Reset to first page after adding to ensure new item is visible
+      setPagination(prev => ({ ...prev, page: 1 }));
     } catch (error) {
       console.error('Failed to create subscription:', error);
       throw error;
@@ -259,6 +280,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       );
       await refreshStats(); // Refresh stats after editing subscription
       setEditingSubscription(null);
+      setIsEditDialogOpen(false);
     } catch (error) {
       console.error('Failed to update subscription:', error);
       throw error;
@@ -623,6 +645,33 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
             </div>
           )}
         </CardContent>
+
+        {/* Pagination Controls */}
+        {pagination.pages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              Page {pagination.page} of {pagination.pages} ({pagination.total} total items)
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                disabled={pagination.page <= 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                disabled={pagination.page >= pagination.pages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* CRUD Modals */}
