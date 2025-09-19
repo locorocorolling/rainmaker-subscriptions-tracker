@@ -49,7 +49,7 @@ const subscriptionSchema = z.object({
     value: z.number().min(1, "Billing cycle value must be at least 1"),
     unit: z.enum(["day", "month", "year"]),
   }),
-  nextRenewal: z.string().min(1, "Next renewal date is required"),
+  firstBillingDate: z.string().min(1, "First billing date is required"),
   status: z.enum(["active", "paused", "cancelled", "expired"]),
   metadata: z.object({
     color: z.string().optional(),
@@ -248,7 +248,7 @@ export function SubscriptionForm({
         value: 1,
         unit: "month",
       },
-      nextRenewal: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to tomorrow's date
+      firstBillingDate: new Date().toISOString().split('T')[0], // Default to today (when subscription starts)
       status: "active" as const,
     }
   }, [])
@@ -273,7 +273,7 @@ export function SubscriptionForm({
           value: initialData.billingCycle?.value || 1,
           unit: initialData.billingCycle?.unit || "month",
         },
-        nextRenewal: initialData.nextRenewal || "",
+        firstBillingDate: initialData.firstBillingDate || "",
         status: initialData.status || "active",
       }
       form.reset(resetValues)
@@ -478,10 +478,10 @@ export function SubscriptionForm({
 
               <FormField
                 control={form.control}
-                name="nextRenewal"
+                name="firstBillingDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Next Renewal Date<span className="text-amber-500 ml-0.5">*</span></FormLabel>
+                    <FormLabel className="text-sm font-medium">First Billing Date<span className="text-amber-500 ml-0.5">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>

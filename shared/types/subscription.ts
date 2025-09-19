@@ -67,7 +67,7 @@ export interface CreateSubscriptionInput {
   category?: string;
   cost: Money;
   billingCycle: BillingCycle;
-  firstBillingDate: Date;
+  firstBillingDate: Date | string; // Date object after Joi validation, string over HTTP
   endOfMonthStrategy?: EndOfMonthStrategy; // Default: 'last_day_of_month'
   metadata?: Subscription['metadata'];
 }
@@ -79,7 +79,7 @@ export interface UpdateSubscriptionInput {
   category?: string;
   cost?: Money;
   billingCycle?: BillingCycle;
-  firstBillingDate?: Date;
+  firstBillingDate?: Date | string;
   nextRenewal?: Date;
   endOfMonthStrategy?: EndOfMonthStrategy;
   preservedBillingDay?: number;

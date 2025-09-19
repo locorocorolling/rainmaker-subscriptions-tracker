@@ -153,7 +153,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
-        firstBillingDate: new Date(data.nextRenewal).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
+        firstBillingDate: new Date(data.firstBillingDate).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),

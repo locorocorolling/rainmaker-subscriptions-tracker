@@ -19,7 +19,7 @@ const createSubscriptionSchema = Joi.object({
     value: Joi.number().required().min(1).max(365),
     unit: Joi.string().required().valid('day', 'month', 'year')
   }).required(),
-  firstBillingDate: Joi.date().required().min('now'),
+  firstBillingDate: Joi.date().required().min(new Date(new Date().setHours(0,0,0,0))),
   status: Joi.string().valid('active', 'paused', 'cancelled', 'expired').default('active'),
   metadata: Joi.object({
     color: Joi.string().pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
@@ -41,7 +41,7 @@ const updateSubscriptionSchema = Joi.object({
     value: Joi.number().min(1).max(365),
     unit: Joi.string().valid('day', 'month', 'year')
   }),
-  firstBillingDate: Joi.date().min('now'),
+  firstBillingDate: Joi.date().min(new Date(new Date().setHours(0,0,0,0))),
   nextRenewal: Joi.date().min('now'),
   status: Joi.string().valid('active', 'paused', 'cancelled', 'expired'),
   metadata: Joi.object({

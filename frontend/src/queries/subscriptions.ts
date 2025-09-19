@@ -116,7 +116,7 @@ export const useCreateSubscription = () => {
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
-        firstBillingDate: new Date(data.nextRenewal).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
+        firstBillingDate: new Date(data.firstBillingDate).toISOString(), // Backend uses firstBillingDate, convert to full ISO string
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),
@@ -150,7 +150,8 @@ export const useUpdateSubscription = () => {
           currency: data.cost.currency
         },
         billingCycle: data.billingCycle,
-        nextRenewal: new Date(data.nextRenewal).toISOString(),
+        // TODO: ME-142 - Update should semantically use nextRenewal, not firstBillingDate
+        firstBillingDate: new Date(data.nextRenewal).toISOString(),
         status: data.status,
         metadata: {
           ...(data.metadata?.color && { color: data.metadata.color }),

@@ -11,12 +11,20 @@ export class SubscriptionService {
     userId: string,
     input: CreateSubscriptionInput
   ): Promise<ISubscriptionDocument> {
+    // Handle both field names during transition (firstBillingDate is new, nextRenewal is legacy)
+    const billingDateValue = input.firstBillingDate || (input as any).nextRenewal;
+    if (!billingDateValue) {
+      throw new Error('firstBillingDate or nextRenewal is required');
+    }
+
+    const firstBillingDate = new Date(billingDateValue);
+
     // Extract the preserved billing day from the first billing date
-    const preservedBillingDay = input.firstBillingDate.getDate();
+    const preservedBillingDay = firstBillingDate.getDate();
 
     // Calculate next renewal date using the new preserved billing day logic
     const nextRenewal = this.calculateNextRenewalWithPreservedDay(
-      input.firstBillingDate,
+      firstBillingDate,
       input.billingCycle,
       preservedBillingDay
     );
@@ -87,12 +95,12 @@ export class SubscriptionService {
       if (!subscription) return null;
 
       const billingCycle = updates.billingCycle || subscription.billingCycle;
-      const firstBillingDate = updates.firstBillingDate || subscription.firstBillingDate;
+      const firstBillingDate = new Date(updates.firstBillingDate || subscription.firstBillingDate);
 
       // Update preserved billing day if first billing date changed
       let preservedBillingDay = subscription.preservedBillingDay;
       if (updates.firstBillingDate) {
-        preservedBillingDay = updates.firstBillingDate.getDate();
+        preservedBillingDay = firstBillingDate.getDate();
         updates.preservedBillingDay = preservedBillingDay;
       }
 
