@@ -7,6 +7,7 @@ import { useCreateSubscription } from "@/queries/subscriptions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Subscriptions() {
   const { user, loading } = useAuth();
@@ -30,6 +31,34 @@ export default function Subscriptions() {
       throw error;
     }
   };
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
+        <div className="flex-1 container mx-auto p-6 max-w-6xl">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-lg">Loading...</div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show message if not authenticated (before redirect)
+  if (!user) {
+    return (
+      <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>
+        <div className="flex-1 container mx-auto p-6 max-w-6xl">
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground">Please sign in to view your subscriptions.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout onAddSubscription={() => setIsAddDialogOpen(true)}>

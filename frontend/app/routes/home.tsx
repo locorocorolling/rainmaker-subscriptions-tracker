@@ -19,6 +19,9 @@ export default function Home() {
   const { user, logout, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  // Debug states for visual testing
+  const [debugState, setDebugState] = useState<'normal' | 'loading' | 'error' | 'empty'>('normal');
   const navigate = useNavigate();
 
   const { stats, isLoading, error } = useSubscriptionData();
@@ -52,6 +55,44 @@ export default function Home() {
           title="Subscription Tracker"
           subtitle="Track all your subscriptions in one place"
         >
+          {/* Debug Controls */}
+          {user && (
+            <div className="flex gap-1 text-xs">
+              <span className="text-muted-foreground self-center">Debug:</span>
+              <Button
+                variant={debugState === 'normal' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setDebugState('normal')}
+                className="text-xs h-7"
+              >
+                Normal
+              </Button>
+              <Button
+                variant={debugState === 'loading' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setDebugState('loading')}
+                className="text-xs h-7"
+              >
+                Loading
+              </Button>
+              <Button
+                variant={debugState === 'error' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setDebugState('error')}
+                className="text-xs h-7"
+              >
+                Error
+              </Button>
+              <Button
+                variant={debugState === 'empty' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setDebugState('empty')}
+                className="text-xs h-7"
+              >
+                Empty
+              </Button>
+            </div>
+          )}
           {!user && (
             <Button onClick={() => setShowAuthModal(true)}>
               Sign In
@@ -60,12 +101,39 @@ export default function Home() {
         </PageHeader>
 
       {user ? (
-        isLoading ? (
+        (isLoading || debugState === 'loading') ? (
           /* Loading State */
           <div className="flex items-center justify-center py-20">
             <div className="text-lg">Loading...</div>
           </div>
-        ) : stats.activeCount === 0 ? (
+        ) : (error || debugState === 'error') ? (
+          /* Error State - Show this BEFORE checking for empty */
+          <Card>
+            <CardContent className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <div className="w-16 h-16 mx-auto mb-4 bg-destructive/10 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">⚠️</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Failed to load subscription data</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  We're having trouble connecting to our servers. Please check your internet connection and try again.
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Try Again
+                  </Button>
+                  <div className="text-xs text-muted-foreground">
+                    {error?.message || 'Debug error state'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (stats.activeCount === 0 || debugState === 'empty') ? (
           /* Empty State: Only Getting Started */
           <div className="max-w-4xl mx-auto">
             <GettingStartedSuggestions onAddSubscription={() => setIsAddDialogOpen(true)} />
@@ -114,13 +182,7 @@ export default function Home() {
               onAddSubscription={() => setIsAddDialogOpen(true)}
             />
 
-            {error && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <p className="text-red-500">Error loading subscriptions: {error.message}</p>
-                </CardContent>
-              </Card>
-            )}
+            {/* Error handling moved to top-level condition above */}
           </div>
         )
       ) : (

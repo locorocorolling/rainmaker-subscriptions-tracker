@@ -57,6 +57,13 @@ cd backend && pnpm install && pnpm run dev       # Terminal 2
 - **Email notifications** with HTML templates via Resend
 - **Configurable reminder periods** and notification preferences
 
+### **Interactive State Testing**
+- **Debug UI controls** for demonstrating different application states
+- **Loading, error, and empty state variations** accessible via in-app buttons
+- **Interview-friendly feature** allowing quick demonstration of UX handling
+- **Home page controls:** Normal, Loading, Error, Empty states
+- **Subscriptions page controls:** Normal, Loading, Error, Empty with contextual messaging
+
 ### **Secure Authentication**
 - **JWT-based authentication** with localStorage persistence
 - **Protected routes** and API endpoint security

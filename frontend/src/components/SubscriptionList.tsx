@@ -71,6 +71,9 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Debug states for visual testing
+  const [debugState, setDebugState] = useState<'normal' | 'loading' | 'error' | 'empty'>('normal');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -469,25 +472,80 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
     );
   }
 
-  if (isLoading) {
+  if (isLoading || debugState === 'loading') {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Loading subscriptions...</p>
+      <div className="space-y-6">
+        {/* Loading Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Total</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Loading Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Subscriptions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 py-3">
+                  <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
+                    <div className="h-3 bg-muted animate-pulse rounded w-1/6" />
+                  </div>
+                  <div className="h-4 bg-muted animate-pulse rounded w-20" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-16" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-24" />
+                  <div className="h-6 bg-muted animate-pulse rounded w-16" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (error) {
+  if (error || debugState === 'error') {
     return (
       <Card>
         <CardContent className="text-center py-12">
-          <p className="text-destructive mb-4">Error: {error}</p>
-          <Button
-            onClick={() => window.location.reload()}
-            variant="outline"
-          >
-            Retry
-          </Button>
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 mx-auto mb-4 bg-destructive/10 rounded-full flex items-center justify-center">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Unable to load subscriptions</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              We're having trouble connecting to our servers. Please check your internet connection and try again.
+            </p>
+            <div className="space-y-2">
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+              >
+                Try Again
+              </Button>
+              <div className="text-xs text-muted-foreground">
+                Error: {error || 'Debug error state'}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -564,6 +622,45 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         </div>
 
         <div className="flex gap-1">
+          {/* Debug State Toggle */}
+          <div className="flex gap-1 mr-4 border-r pr-4">
+            <span className="text-xs text-muted-foreground self-center">Debug:</span>
+            <Button
+              variant={debugState === 'normal' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setDebugState('normal')}
+              className="text-xs h-7"
+            >
+              Normal
+            </Button>
+            <Button
+              variant={debugState === 'loading' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setDebugState('loading')}
+              className="text-xs h-7"
+            >
+              Loading
+            </Button>
+            <Button
+              variant={debugState === 'error' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setDebugState('error')}
+              className="text-xs h-7"
+            >
+              Error
+            </Button>
+            <Button
+              variant={debugState === 'empty' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                setDebugState('empty');
+                setAllSubscriptions([]);
+              }}
+              className="text-xs h-7"
+            >
+              Empty
+            </Button>
+          </div>
           <Button
             variant={sorting[0]?.id === 'service' ? 'secondary' : 'ghost'}
             size="sm"
@@ -630,18 +727,45 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
             </TableBody>
           </Table>
 
-          {table.getRowModel().rows.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No subscriptions found</div>
-              <Button
-                onClick={() => setIsAddDialogOpen(true)}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add your first subscription
-              </Button>
+          {(table.getRowModel().rows.length === 0 || debugState === 'empty') && (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="mb-6">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                    <Plus className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {filterStatus === 'all' ? 'No subscriptions yet' : `No ${filterStatus} subscriptions`}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    {filterStatus === 'all'
+                      ? 'Start tracking your subscriptions to see your spending patterns and upcoming renewals'
+                      : `You don't have any ${filterStatus} subscriptions. Try changing the filter or add a new subscription.`
+                    }
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => setIsAddDialogOpen(true)}
+                    size="lg"
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Subscription
+                  </Button>
+                  {filterStatus !== 'all' && (
+                    <div>
+                      <Button
+                        onClick={() => setFilterStatus('all')}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        View all subscriptions
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
