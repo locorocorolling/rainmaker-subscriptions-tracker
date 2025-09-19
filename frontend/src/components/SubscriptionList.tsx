@@ -62,6 +62,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
 
   // CRUD state
   const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -107,6 +108,10 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
         }));
 
         setAllSubscriptions(transformedSubscriptions);
+
+        // Fetch stats for accurate counts
+        const statsResponse = await api.getSubscriptionStats();
+        setStats(statsResponse.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch subscriptions');
       } finally {
@@ -116,6 +121,16 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
 
     fetchSubscriptions();
   }, [token]);
+
+  // Helper function to refresh stats
+  const refreshStats = async () => {
+    try {
+      const statsResponse = await api.getSubscriptionStats();
+      setStats(statsResponse.data);
+    } catch (error) {
+      console.error('Failed to refresh stats:', error);
+    }
+  };
 
   const displaySubscriptions = allSubscriptions;
 
@@ -182,6 +197,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       };
 
       setAllSubscriptions(prev => [...prev, transformedResponse]);
+      await refreshStats(); // Refresh stats after adding subscription
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error('Failed to create subscription:', error);
@@ -241,6 +257,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       setAllSubscriptions(prev =>
         prev.map(sub => sub.id === editingSubscription.id ? updatedSubscription : sub)
       );
+      await refreshStats(); // Refresh stats after editing subscription
       setEditingSubscription(null);
     } catch (error) {
       console.error('Failed to update subscription:', error);
@@ -256,6 +273,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
       setAllSubscriptions(prev =>
         prev.filter(sub => sub.id !== deletingSubscription.id)
       );
+      await refreshStats(); // Refresh stats after deleting subscription
       setDeletingSubscription(null);
     } catch (error) {
       console.error('Failed to delete subscription:', error);
@@ -463,7 +481,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {sortedSubscriptions.filter(sub => sub.status === 'active').length}
+              {stats?.active || 0}
             </div>
           </CardContent>
         </Card>
@@ -474,7 +492,7 @@ export function SubscriptionList({ subscriptions: propSubscriptions }: Subscript
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(monthlyTotal)}
+              {formatCurrency(stats?.monthlyTotal || 0)}
             </div>
           </CardContent>
         </Card>
