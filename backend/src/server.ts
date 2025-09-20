@@ -292,6 +292,9 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 const app: express.Application = express();
 const PORT = config.PORT;
 
+// Trust proxy for reverse proxy setups (tunnels, load balancers, etc.)
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({

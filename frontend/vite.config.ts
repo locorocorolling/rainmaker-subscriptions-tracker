@@ -5,4 +5,11 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  server: {
+    host: true,
+    allowedHosts: [
+      'subscriptions.on-the-radar.org',
+      'temp-subscriptions-backend.on-the-radar.org'
+    ]
+  },
 });
