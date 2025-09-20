@@ -20,6 +20,10 @@ RUN pnpm install --frozen-lockfile --prod
 
 # Build stage
 FROM base AS build
+# Accept build arguments for Vite
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 COPY --from=development-dependencies /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
