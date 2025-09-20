@@ -7,12 +7,12 @@ import dotenv from 'dotenv';
 import { createLogger, format, transports } from 'winston';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { checkMongoDBHealth } from './utils/database';
-import { config } from './utils/config';
-import authRoutes from './routes/auth';
-import subscriptionRoutes from './routes/subscriptions';
-import userRoutes from './routes/user';
-import { BackgroundJobService } from './services/backgroundJobService';
+import { checkMongoDBHealth } from '../src/utils/database';
+import { config } from '../src/utils/config';
+import authRoutes from '../src/routes/auth';
+import subscriptionRoutes from '../src/routes/subscriptions';
+import userRoutes from '../src/routes/user';
+import { BackgroundJobService } from '../src/services/backgroundJobService';
 
 // Load environment variables
 dotenv.config();
@@ -86,13 +86,16 @@ const swaggerOptions = {
       }
     ]
   },
-  apis: ['./src/routes/*.ts', './src/server.ts']
+  apis: ['../src/routes/*.ts', '../src/server.ts']
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Create Express app
 const app: express.Application = express();
+
+// Trust proxy for reverse proxy setups (tunnels, load balancers, etc.)
+app.set('trust proxy', true);
 
 // Security middleware
 app.use(helmet());
