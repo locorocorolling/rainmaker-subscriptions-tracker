@@ -1,30 +1,32 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import app from '../../app';
 import { UserModel } from '../../../src/models/User';
 import { UserService } from '../../../src/services/userService';
+import {
+  createMongoTestContainer,
+  connectToTestContainer,
+  cleanupTestContainer,
+  MongoTestContainer
+} from '../../helpers/testcontainers.js';
 
 describe('User Preferences API', () => {
   let authToken: string;
   let userId: string;
-  let mongoServer: MongoMemoryServer;
+  let mongoContainer: MongoTestContainer;
 
   beforeAll(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
+    // Start MongoDB test container
+    mongoContainer = await createMongoTestContainer();
 
-    // Connect to in-memory database
-    await mongoose.connect(mongoUri);
-  });
+    // Connect to test container
+    await connectToTestContainer(mongoContainer.uri);
+  }, 15000); // 15 second timeout
 
   afterAll(async () => {
-    // Clean up and close database connection
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Clean up test container
+    await cleanupTestContainer(mongoContainer.container);
   });
 
   beforeEach(async () => {

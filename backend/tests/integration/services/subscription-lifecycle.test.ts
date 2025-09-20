@@ -12,37 +12,39 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import { SubscriptionService } from '../../../src/services/subscription.js';
 import { SubscriptionModel } from '../../../src/models/Subscription.js';
 import { createTestDate, LEAP_YEAR_DATES, END_OF_MONTH_SCENARIOS } from '../../helpers/dateUtils.js';
+import {
+  createMongoTestContainer,
+  connectToTestContainer,
+  cleanupTestContainer,
+  MongoTestContainer
+} from '../../helpers/testcontainers.js';
 
-let mongoServer: MongoMemoryServer;
+let mongoContainer: MongoTestContainer;
 
 describe('Subscription Lifecycle Integration Tests', () => {
   beforeAll(async () => {
     try {
-      // Start in-memory MongoDB
-      mongoServer = await MongoMemoryServer.create();
-      const mongoUri = mongoServer.getUri();
+      // Start MongoDB test container
+      mongoContainer = await createMongoTestContainer();
 
-      // Connect to the in-memory database
-      await mongoose.connect(mongoUri);
-      console.log('Connected to MongoDB Memory Server for integration tests');
+      // Connect to the container
+      await connectToTestContainer(mongoContainer.uri);
+      console.log('Connected to MongoDB test container for integration tests');
     } catch (error) {
-      console.error('Failed to setup MongoDB Memory Server:', error);
+      console.error('Failed to setup MongoDB test container:', error);
       throw error;
     }
-  });
+  }, 15000); // 15 second timeout
 
   afterAll(async () => {
     try {
-      await mongoose.connection.dropDatabase();
-      await mongoose.connection.close();
-      await mongoServer.stop();
-      console.log('Cleaned up MongoDB Memory Server');
+      await cleanupTestContainer(mongoContainer.container);
+      console.log('Cleaned up MongoDB test container');
     } catch (error) {
-      console.error('Failed to cleanup MongoDB Memory Server:', error);
+      console.error('Failed to cleanup MongoDB test container:', error);
     }
   });
 

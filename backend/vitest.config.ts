@@ -18,12 +18,8 @@ export default defineConfig({
     },
     setupFiles: ['./tests/setup.ts'],
     testTimeout: 30000,
-    hookTimeout: 30000,
-    pool: 'forks',
-    env: {
-      MONGOMS_DOWNLOAD_DIR: process.env.HOME + '/.mongodb-memory-server-binaries',
-      MONGOMS_VERSION: '8.0.1'
-    }
+    hookTimeout: 15000, // Fast container startup
+    pool: 'forks'
   },
   resolve: {
     alias: {
