@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.7.0",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc --build && tsc-esm-fix --target=dist",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
@@ -55,6 +55,7 @@
     "eslint": "^8.57.0",
     "mongodb-memory-server": "^10.2.1",
     "supertest": "^7.1.4",
+    "tsc-esm-fix": "^3.1.2",
     "tsx": "^4.15.7",
     "typescript": "^5.5.2",
     "vitest": "^3.2.4"
